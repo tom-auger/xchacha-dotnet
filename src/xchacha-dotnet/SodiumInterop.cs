@@ -1,8 +1,8 @@
-﻿using System;
-using System.Runtime.InteropServices;
-
-namespace xchacha_dotnet
+﻿namespace XChaChaDotNet
 {
+    using System;
+    using System.Runtime.InteropServices;
+
     internal class SodiumInterop
     {
         private const string LibraryName = "libsodium";

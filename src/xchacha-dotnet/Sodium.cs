@@ -1,4 +1,4 @@
-namespace xchacha_dotnet
+namespace XChaChaDotNet
 {    
     public static class Sodium
     {

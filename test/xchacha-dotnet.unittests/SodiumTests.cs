@@ -1,8 +1,8 @@
-using System;
-using Xunit;
-
-namespace xchacha_dotnet.unittests
+namespace XChaChaDotNet.UnitTests
 {
+    using System;
+    using Xunit;
+
     public class SodiumTests
     {
         [Fact]
