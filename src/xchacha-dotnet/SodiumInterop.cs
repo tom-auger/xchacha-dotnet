@@ -12,9 +12,9 @@
 
         #region XChaCha20Poly1305SecretStream
 
+        public const int crypto_secretstream_xchacha20poly1305_KEYBYTES = 32;
         private const int crypto_secretstream_xchacha20poly1305_HEADERBYTES = 24;
         private const int crypto_secretstream_xchacha20poly1305_ABYTES = 17;
-        private const int crypto_secretstream_xchacha20poly1305_KEYBYTES = 32;
         
         // Final tags
         private const byte crypto_secretstream_xchacha20poly1305_TAG_MESSAGE = 0x00;      
