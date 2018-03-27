@@ -99,9 +99,11 @@ namespace XChaChaDotNet
                     // Buffer is empty, so process as much as possible and store the remainder in the buffer
                     if (count > BlockLength)
                     {
-                        // There is more than one block left to go so process it immediately and cirumvent the buffer
+                        // There is more than one block left to go so process it immediately and circumvent the buffer
                         var block = buffer.AsReadOnlySpan().Slice(offset, BlockLength);
                         this.ProcessBlock(block, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE);
+                        count -= BlockLength;
+                        offset += BlockLength;
                     }
                     else 
                     {

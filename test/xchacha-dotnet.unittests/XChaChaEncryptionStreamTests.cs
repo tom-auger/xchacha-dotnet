@@ -23,5 +23,24 @@ namespace XChaChaDotNet.UnitTests
             
             Assert.NotEmpty(cipherText);
         }
+
+        [Fact]
+        public void Test_Encrypt_LargeData()
+        {
+            var key = XChaChaKeyGenerator.GenerateKey();
+            var outputStream = new MemoryStream();
+
+            using(var cStream = new XChaChaEncryptionStream(outputStream, key))
+            {
+                var plainText = new byte[1024 * 1024];
+                Array.Fill(plainText, (byte)0x7);
+
+                cStream.Write(plainText, 0, plainText.Length);
+            }
+            
+            var cipherText = outputStream.ToArray();
+
+            Assert.NotEmpty(cipherText);
+        }
     }
 }
