@@ -10,37 +10,39 @@ namespace XChaChaDotNet.UnitTests
         [Fact]
         public void Test_Encrypt_DoesNotFail()
         {
-            var key = XChaChaKeyGenerator.GenerateKey();
-            var outputStream = new MemoryStream();
-
-            using(var cStream = new XChaChaEncryptionStream(outputStream, key))
+            using (var outputStream = new MemoryStream())
             {
-                var plainText = Encoding.UTF8.GetBytes("banana");
-                cStream.Write(plainText, 0, plainText.Length);
+                var key = XChaChaKeyGenerator.GenerateKey();
+                using (var cipherStream = new XChaChaEncryptionStream(outputStream, key))
+                {
+                    var plainText = Encoding.UTF8.GetBytes("banana");
+                    cipherStream.Write(plainText, 0, plainText.Length);
+                }
+
+                var cipherText = outputStream.ToArray();
+
+                Assert.NotEmpty(cipherText);
             }
-            
-            var cipherText = outputStream.ToArray();
-            
-            Assert.NotEmpty(cipherText);
         }
 
         [Fact]
         public void Test_Encrypt_LargeData()
         {
-            var key = XChaChaKeyGenerator.GenerateKey();
-            var outputStream = new MemoryStream();
-
-            using(var cStream = new XChaChaEncryptionStream(outputStream, key))
+            using (var outputStream = new MemoryStream())
             {
-                var plainText = new byte[1024 * 1024];
-                Array.Fill(plainText, (byte)0x7);
+                var key = XChaChaKeyGenerator.GenerateKey();
+                using (var cipherStream = new XChaChaEncryptionStream(outputStream, key))
+                {
+                    var plainText = new byte[1024 * 1024];
+                    Array.Fill(plainText, (byte)0x7);
 
-                cStream.Write(plainText, 0, plainText.Length);
+                    cipherStream.Write(plainText, 0, plainText.Length);
+                }
+
+                var cipherText = outputStream.ToArray();
+
+                Assert.NotEmpty(cipherText);
             }
-            
-            var cipherText = outputStream.ToArray();
-
-            Assert.NotEmpty(cipherText);
         }
     }
 }
