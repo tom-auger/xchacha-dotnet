@@ -130,6 +130,7 @@ namespace XChaChaDotNet
             {
                 this.ProcessInBuffer(crypto_secretstream_xchacha20poly1305_TAG_FINAL);
                 base.Close();
+                Marshal.FreeHGlobal(this.state);
                 isClosed = true;
             }
         }
