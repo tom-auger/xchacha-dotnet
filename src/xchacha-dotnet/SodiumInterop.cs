@@ -13,14 +13,14 @@
         #region XChaCha20Poly1305SecretStream
 
         public const int crypto_secretstream_xchacha20poly1305_KEYBYTES = 32;
-        private const int crypto_secretstream_xchacha20poly1305_HEADERBYTES = 24;
-        private const int crypto_secretstream_xchacha20poly1305_ABYTES = 17;
+        public const int crypto_secretstream_xchacha20poly1305_HEADERBYTES = 24;
+        public const int crypto_secretstream_xchacha20poly1305_ABYTES = 17;
         
         // Final tags
-        private const byte crypto_secretstream_xchacha20poly1305_TAG_MESSAGE = 0x00;      
-        private const byte crypto_secretstream_xchacha20poly1305_TAG_PUSH = 0x01;
-        private const byte crypto_secretstream_xchacha20poly1305_TAG_REKEY = 0x02;
-        private const byte crypto_secretstream_xchacha20poly1305_TAG_FINAL = 
+        public const byte crypto_secretstream_xchacha20poly1305_TAG_MESSAGE = 0x00;      
+        public const byte crypto_secretstream_xchacha20poly1305_TAG_PUSH = 0x01;
+        public const byte crypto_secretstream_xchacha20poly1305_TAG_REKEY = 0x02;
+        public const byte crypto_secretstream_xchacha20poly1305_TAG_FINAL = 
             crypto_secretstream_xchacha20poly1305_TAG_PUSH | crypto_secretstream_xchacha20poly1305_TAG_REKEY;
 
         // Key generation
@@ -37,9 +37,9 @@
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int crypto_secretstream_xchacha20poly1305_push(
             IntPtr state,
-            IntPtr c,
+            ref byte c,
             out UInt64 clen_p,
-            IntPtr m,
+            in byte m,
             UInt64 mlen,
             IntPtr ad,
             UInt64 adlen,
