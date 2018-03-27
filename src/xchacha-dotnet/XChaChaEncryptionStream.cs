@@ -55,7 +55,12 @@ namespace XChaChaDotNet
 
         public override void Flush()
         {
-            throw new NotImplementedException();
+            this.ProcessInBuffer(crypto_secretstream_xchacha20poly1305_TAG_FINAL);
+        }
+
+        public void FlushFinal()
+        {
+            this.ProcessInBuffer(crypto_secretstream_xchacha20poly1305_TAG_FINAL);
         }
 
         public override int Read(byte[] buffer, int offset, int count) =>
