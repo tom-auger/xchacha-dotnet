@@ -55,7 +55,7 @@ namespace XChaChaDotNet
 
         public override void Flush()
         {
-            this.ProcessInBuffer(crypto_secretstream_xchacha20poly1305_TAG_FINAL);
+            this.ProcessInBuffer(crypto_secretstream_xchacha20poly1305_TAG_MESSAGE);
         }
 
         public void FlushFinal()
@@ -142,6 +142,7 @@ namespace XChaChaDotNet
             var block = this.inBuffer
                 .AsReadOnlySpan()
                 .Slice(0, this.inBufferPosition);
+                
             this.ProcessBlock(block, tag);
         }
 
