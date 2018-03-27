@@ -13,13 +13,11 @@ namespace XChaChaDotNet
         private readonly Stream stream;
         private readonly IntPtr state;
 
+        private bool isClosed;
         private bool headerWritten;
         private int inBufferPosition;
         private byte[] inBuffer = new byte[BlockLength];
-        private int outBufferPosition;
         private byte[] outBuffer = new byte[EncryptedBlockLength];
-
-        private bool isClosed;
 
         public XChaChaEncryptionStream(Stream stream, ReadOnlySpan<byte> key)
         {
@@ -33,7 +31,6 @@ namespace XChaChaDotNet
 
             // The length of the header is smaller than EncryptedBlockLength so it will fit
             var initResult = crypto_secretstream_xchacha20poly1305_init_push(this.state, this.outBuffer, key.ToArray());
-            this.outBufferPosition = crypto_secretstream_xchacha20poly1305_HEADERBYTES;
 
             if (initResult != 0)
                 throw new Exception("crypto stream initialization failed");
@@ -76,10 +73,7 @@ namespace XChaChaDotNet
 
             if (!this.headerWritten)
             {
-                // Write the header
-                this.stream.Write(this.inBuffer, 0, this.inBufferPosition);
-                this.inBufferPosition = 0;
-                this.headerWritten = true;
+                this.ProcessHeader();
             }
 
             while (count > 0)
@@ -105,7 +99,7 @@ namespace XChaChaDotNet
                         count -= BlockLength;
                         offset += BlockLength;
                     }
-                    else 
+                    else
                     {
                         // Store what's left in the buffer
                         Array.Copy(buffer, this.inBuffer, count);
@@ -114,7 +108,7 @@ namespace XChaChaDotNet
                         offset += count;
                     }
                 }
-                else 
+                else
                 {
                     // Attempt to fill the buffer first before processing
                     var bytesToRead = Math.Min(count, remainingInBufferCapacity);
@@ -137,13 +131,26 @@ namespace XChaChaDotNet
             }
         }
 
+        private void ProcessHeader()
+        {
+            this.stream.Write(this.outBuffer, 0, crypto_secretstream_xchacha20poly1305_HEADERBYTES);
+            this.headerWritten = true;
+        }
+
         private void ProcessInBuffer(byte tag)
         {
-            var block = this.inBuffer
-                .AsReadOnlySpan()
-                .Slice(0, this.inBufferPosition);
-                
-            this.ProcessBlock(block, tag);
+            if (!this.headerWritten)
+            {
+                this.ProcessHeader();
+            }
+            else
+            {
+                var block = this.inBuffer
+                    .AsReadOnlySpan()
+                    .Slice(0, this.inBufferPosition);
+
+                this.ProcessBlock(block, tag);
+            }
         }
 
         private void ProcessBlock(ReadOnlySpan<byte> block, byte tag)
@@ -153,15 +160,14 @@ namespace XChaChaDotNet
                 crypto_secretstream_xchacha20poly1305_push(
                         this.state,
                         ref MemoryMarshal.GetReference(this.outBuffer.AsSpan()),
-                        out var clen,
+                        out var cipherTextLength,
                         in MemoryMarshal.GetReference(block),
                         (ulong)block.Length,
                         IntPtr.Zero,
                         0,
                         tag);
 
-                this.outBufferPosition = (int)clen;
-                this.stream.Write(this.outBuffer, 0, this.outBufferPosition);
+                this.stream.Write(this.outBuffer, 0, (int)cipherTextLength);
                 this.inBufferPosition = 0;
             }
         }

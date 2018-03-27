@@ -20,7 +20,6 @@ namespace XChaChaDotNet.UnitTests
                 }
 
                 var cipherText = outputStream.ToArray();
-
                 Assert.NotEmpty(cipherText);
             }
         }
@@ -40,8 +39,44 @@ namespace XChaChaDotNet.UnitTests
                 }
 
                 var cipherText = outputStream.ToArray();
-
                 Assert.NotEmpty(cipherText);
+            }
+        }
+
+        [Fact]
+        public void Test_Encrypt_OutputsHeader()
+        {
+            using (var outputStream = new MemoryStream())
+            {
+                var key = XChaChaKeyGenerator.GenerateKey();
+                using (var cipherStream = new XChaChaEncryptionStream(outputStream, key))
+                {
+                    var plainText = Array.Empty<byte>();
+
+                    cipherStream.Write(plainText, 0, plainText.Length);
+                }
+
+                var cipherText = outputStream.ToArray();
+                Assert.Equal(24, cipherText.Length);
+            }
+        }
+
+        [Fact]
+        public void Test_Flush_FlushesHeader()
+        {
+            using (var outputStream = new MemoryStream())
+            {
+                var key = XChaChaKeyGenerator.GenerateKey();
+                using (var cipherStream = new XChaChaEncryptionStream(outputStream, key))
+                {
+                    var plainText = Array.Empty<byte>();
+
+                    cipherStream.Write(plainText, 0, plainText.Length);
+                    cipherStream.Flush();
+
+                    var cipherText = outputStream.ToArray();
+                    Assert.Equal(24, cipherText.Length);
+                }
             }
         }
     }
