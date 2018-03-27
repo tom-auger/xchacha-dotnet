@@ -26,7 +26,7 @@ namespace XChaChaDotNet.UnitTests
         }
 
         [Fact]
-        public void Test_Encrypt_LargeData()
+        public void Test_Encrypt_DoesNotFail_WithLargeData()
         {
             using (var outputStream = new MemoryStream())
             {
