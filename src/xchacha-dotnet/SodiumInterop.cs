@@ -15,12 +15,12 @@
         public const int crypto_secretstream_xchacha20poly1305_KEYBYTES = 32;
         public const int crypto_secretstream_xchacha20poly1305_HEADERBYTES = 24;
         public const int crypto_secretstream_xchacha20poly1305_ABYTES = 17;
-        
+
         // Final tags
-        public const byte crypto_secretstream_xchacha20poly1305_TAG_MESSAGE = 0x00;      
+        public const byte crypto_secretstream_xchacha20poly1305_TAG_MESSAGE = 0x00;
         public const byte crypto_secretstream_xchacha20poly1305_TAG_PUSH = 0x01;
         public const byte crypto_secretstream_xchacha20poly1305_TAG_REKEY = 0x02;
-        public const byte crypto_secretstream_xchacha20poly1305_TAG_FINAL = 
+        public const byte crypto_secretstream_xchacha20poly1305_TAG_FINAL =
             crypto_secretstream_xchacha20poly1305_TAG_PUSH | crypto_secretstream_xchacha20poly1305_TAG_REKEY;
 
         // Key generation
@@ -45,16 +45,21 @@
             UInt64 adlen,
             byte tag);
 
-         // Decryption
+        // Decryption
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int crypto_secretstream_xchacha20poly1305_init_pull(
             IntPtr state,
             byte[] header,
             byte[] key);
 
+
+
         // State
         public struct crypto_secretstream_xchacha20poly1305_state
         {
+            // Disable compilier warning: Field is not assigned to and will always have its default value 'null'
+#pragma warning disable 0649
+
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
             public byte[] k;
 
@@ -63,6 +68,8 @@
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
             public byte[] _pad;
+
+#pragma warning restore 0649
         }
 
         #endregion
