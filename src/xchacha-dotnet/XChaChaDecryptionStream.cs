@@ -18,6 +18,7 @@ namespace XChaChaDotNet
         private byte[] inBuffer = new byte[EncryptedBlockLength];
         private int outBufferPosition;
         private byte[] outBuffer = new byte[BlockLength];
+        private byte tagOfLastProcessedBlock;
 
         public XChaChaDecryptionStream(Stream stream, ReadOnlySpan<byte> key)
         {
@@ -63,14 +64,34 @@ namespace XChaChaDotNet
         {
             if (!this.stream.CanRead) throw new NotSupportedException();
 
-            var totalBytesRead = 0;
-            
-            
+            var totalBytesOutput = 0;
             while (count > 0)
             {
+                // If there's any data left in the outBuffer then output this first
+                if (this.outBufferPosition > 0)
+                {
+                    var numberOfBytesLeftInOutBuffer = 
+                        this.outBuffer.Length - this.outBufferPosition;
+
+                    var numberOfBufferedBytesToOutput = Math.Min(numberOfBytesLeftInOutBuffer, count);
+                    
+                    Array.Copy(this.outBuffer, this.outBufferPosition, buffer, offset, numberOfBufferedBytesToOutput);
+
+                    this.outBufferPosition += numberOfBufferedBytesToOutput;
+                    offset += numberOfBufferedBytesToOutput;
+                    count -= numberOfBufferedBytesToOutput;
+                    totalBytesOutput += numberOfBufferedBytesToOutput;
+
+                    if (this.outBufferPosition == this.outBuffer.Length) 
+                        this.outBufferPosition = 0;
+                    
+                    continue;
+                }
+
+                // Read the next block from the stream
                 var bytesRead = this.stream.Read(this.inBuffer);
 
-                // Stop if we've reached the end of the stream
+                // Stop if we've already reached the end of the stream
                 if (bytesRead == 0) break;
 
                 // Decrypt the next block
@@ -84,15 +105,28 @@ namespace XChaChaDotNet
                     IntPtr.Zero,
                     0);
 
+                // Throw an error if the decrypt failed
                 if (decryptResult != 0) throw new Exception("block is invalid or corrupt");
                 
-                Array.Copy(this.outBuffer, 0, buffer, offset, bytesRead);
+                // Remember the tag in case we want to verify it later
+                this.tagOfLastProcessedBlock = tag;
 
-                offset += bytesRead;
-                count -= bytesRead;
+                // Output the plaintext
+                var numberOfBytesToOutput = Math.Min(count, (int)messageLength);
+                Array.Copy(this.outBuffer, 0, buffer, offset, numberOfBytesToOutput);
+
+                this.outBufferPosition = 
+                    numberOfBytesToOutput < BlockLength 
+                    ? numberOfBytesToOutput
+                    : 0;
+
+                offset += numberOfBytesToOutput;
+                count -= numberOfBytesToOutput;
+
+                totalBytesOutput += numberOfBytesToOutput;
             }
 
-            return totalBytesRead;
+            return totalBytesOutput;
         }
 
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
@@ -111,5 +145,8 @@ namespace XChaChaDotNet
                 isClosed = true;
             }
         }
+
+        public bool VerifyEndOfCipherStream()
+            => this.tagOfLastProcessedBlock == crypto_secretstream_xchacha20poly1305_TAG_FINAL;
     }
 }
