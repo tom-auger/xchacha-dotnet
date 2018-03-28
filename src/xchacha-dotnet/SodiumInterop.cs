@@ -52,8 +52,17 @@
             byte[] header,
             byte[] key);
 
-
-
+        [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int crypto_secretstream_xchacha20poly1305_pull(
+            IntPtr state,
+            ref byte m,
+            out UInt64 mlen_p,
+            out byte tag_p,
+            in byte c,
+            UInt64 clen,
+            IntPtr ad,
+            UInt64 adlen);
+            
         // State
         public struct crypto_secretstream_xchacha20poly1305_state
         {
