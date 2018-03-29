@@ -11,10 +11,9 @@ namespace XChaChaDotNet
         private const int EncryptedBlockLength = BlockLength + crypto_secretstream_xchacha20poly1305_ABYTES;
 
         private readonly Stream stream;
-        private IntPtr state;
+        private readonly IntPtr state;
 
         private bool isClosed;
-        private int inBufferPosition;
         private byte[] inBuffer = new byte[EncryptedBlockLength];
         private int outBufferPosition;
         private byte[] outBuffer = new byte[BlockLength];
@@ -35,7 +34,7 @@ namespace XChaChaDotNet
             if (bytesRead != crypto_secretstream_xchacha20poly1305_HEADERBYTES)
                 throw new Exception("invalid or corrupt header");
 
-            var initResult = crypto_secretstream_xchacha20poly1305_init_push(this.state, this.inBuffer, key.ToArray());
+            var initResult = crypto_secretstream_xchacha20poly1305_init_pull(this.state, this.inBuffer, key.ToArray());
 
             if (initResult != 0)
                 throw new Exception("crypto stream initialization failed");
@@ -97,7 +96,7 @@ namespace XChaChaDotNet
                 // Decrypt the next block
                 var decryptResult = crypto_secretstream_xchacha20poly1305_pull(
                     this.state,
-                    ref MemoryMarshal.GetReference(this.outBuffer.AsReadOnlySpan()),
+                    ref MemoryMarshal.GetReference(this.outBuffer.AsSpan()),
                     out var messageLength,
                     out var tag,
                     in MemoryMarshal.GetReference(this.inBuffer.AsReadOnlySpan()),
