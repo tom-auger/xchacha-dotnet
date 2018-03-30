@@ -11,5 +11,12 @@ namespace XChaChaDotNet.UnitTests
             var key = XChaChaKeyGenerator.GenerateKey();
             Assert.False(key.IsEmpty);
         }
+
+        [Fact]
+        public void Test_KeyLengthIs32()
+        {
+            var key = XChaChaKeyGenerator.GenerateKey();
+            Assert.Equal(32, key.Length);
+        }
     }
 }
