@@ -158,7 +158,7 @@ namespace XChaChaDotNet
 
         private void ProcessBlock(ReadOnlySpan<byte> block, byte tag)
         {
-            crypto_secretstream_xchacha20poly1305_push(
+            var encryptionResult = crypto_secretstream_xchacha20poly1305_push(
                     this.state,
                     ref MemoryMarshal.GetReference(this.outBuffer.AsSpan()),
                     out var cipherTextLength,
@@ -167,6 +167,8 @@ namespace XChaChaDotNet
                     IntPtr.Zero,
                     0,
                     tag);
+
+            if (encryptionResult != 0) throw new Exception("encryption of block failed");
 
             this.stream.Write(this.outBuffer, 0, (int)cipherTextLength);
             this.inBufferPosition = 0;
