@@ -145,31 +145,31 @@ namespace XChaChaDotNet
             }
             else
             {
-                var block = this.inBuffer
-                    .AsReadOnlySpan()
-                    .Slice(0, this.inBufferPosition);
+                if (this.inBufferPosition != 0)
+                {
+                    var block = this.inBuffer
+                        .AsReadOnlySpan()
+                        .Slice(0, this.inBufferPosition);
 
-                this.ProcessBlock(block, tag);
+                    this.ProcessBlock(block, tag);
+                }
             }
         }
 
         private void ProcessBlock(ReadOnlySpan<byte> block, byte tag)
         {
-            if (this.inBufferPosition != 0)
-            {
-                crypto_secretstream_xchacha20poly1305_push(
-                        this.state,
-                        ref MemoryMarshal.GetReference(this.outBuffer.AsSpan()),
-                        out var cipherTextLength,
-                        in MemoryMarshal.GetReference(block),
-                        (ulong)block.Length,
-                        IntPtr.Zero,
-                        0,
-                        tag);
+            crypto_secretstream_xchacha20poly1305_push(
+                    this.state,
+                    ref MemoryMarshal.GetReference(this.outBuffer.AsSpan()),
+                    out var cipherTextLength,
+                    in MemoryMarshal.GetReference(block),
+                    (ulong)block.Length,
+                    IntPtr.Zero,
+                    0,
+                    tag);
 
-                this.stream.Write(this.outBuffer, 0, (int)cipherTextLength);
-                this.inBufferPosition = 0;
-            }
+            this.stream.Write(this.outBuffer, 0, (int)cipherTextLength);
+            this.inBufferPosition = 0;
         }
     }
 }

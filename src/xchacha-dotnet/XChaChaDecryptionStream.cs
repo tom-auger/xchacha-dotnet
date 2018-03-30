@@ -69,11 +69,11 @@ namespace XChaChaDotNet
                 // If there's any data left in the outBuffer then output this first
                 if (this.outBufferPosition > 0)
                 {
-                    var numberOfBytesLeftInOutBuffer = 
+                    var numberOfBytesLeftInOutBuffer =
                         this.outBuffer.Length - this.outBufferPosition;
 
                     var numberOfBufferedBytesToOutput = Math.Min(numberOfBytesLeftInOutBuffer, count);
-                    
+
                     Array.Copy(this.outBuffer, this.outBufferPosition, buffer, offset, numberOfBufferedBytesToOutput);
 
                     this.outBufferPosition += numberOfBufferedBytesToOutput;
@@ -81,9 +81,9 @@ namespace XChaChaDotNet
                     count -= numberOfBufferedBytesToOutput;
                     totalBytesOutput += numberOfBufferedBytesToOutput;
 
-                    if (this.outBufferPosition == this.outBuffer.Length) 
+                    if (this.outBufferPosition == this.outBuffer.Length)
                         this.outBufferPosition = 0;
-                    
+
                     continue;
                 }
 
@@ -106,7 +106,7 @@ namespace XChaChaDotNet
 
                 // Throw an error if the decrypt failed
                 if (decryptResult != 0) throw new Exception("block is invalid or corrupt");
-                
+
                 // Remember the tag in case we want to verify it later
                 this.tagOfLastProcessedBlock = tag;
 
@@ -114,8 +114,8 @@ namespace XChaChaDotNet
                 var numberOfBytesToOutput = Math.Min(count, (int)messageLength);
                 Array.Copy(this.outBuffer, 0, buffer, offset, numberOfBytesToOutput);
 
-                this.outBufferPosition = 
-                    numberOfBytesToOutput < BlockLength 
+                this.outBufferPosition =
+                    numberOfBytesToOutput < BlockLength
                     ? numberOfBytesToOutput
                     : 0;
 

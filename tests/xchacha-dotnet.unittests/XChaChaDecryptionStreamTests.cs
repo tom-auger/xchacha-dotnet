@@ -21,12 +21,40 @@ namespace XChaChaDotNet.UnitTests
                 }
 
                 cipherTextStream.Position = 0;
-                
+
                 using (var decryptionStream = new XChaChaDecryptionStream(cipherTextStream, key))
                 {
                     var decryptedPlainText = new byte[plainText.Length];
-                    var numberOfBytesRead = decryptionStream.Read(decryptedPlainText, 0, decryptedPlainText.Length);
+                    var numberOfBytesOutput = decryptionStream.Read(decryptedPlainText, 0, decryptedPlainText.Length);
 
+                    Assert.Equal(plainText.Length, numberOfBytesOutput);
+                    Assert.Equal(plainText, decryptedPlainText);
+                }
+            }
+        }
+
+        [Fact]
+        public void Test_Decrypt_DecryptsLargeData()
+        {
+            using (var cipherTextStream = new MemoryStream())
+            {
+                var key = XChaChaKeyGenerator.GenerateKey();
+                var plainText = new byte[1024 * 1024];
+                Array.Fill(plainText, (byte)0x7);
+
+                using (var cipherStream = new XChaChaEncryptionStream(cipherTextStream, key))
+                {
+                    cipherStream.Write(plainText, 0, plainText.Length);
+                }
+
+                cipherTextStream.Position = 0;
+
+                using (var decryptionStream = new XChaChaDecryptionStream(cipherTextStream, key))
+                {
+                    var decryptedPlainText = new byte[plainText.Length];
+                    var numberOfBytesOutput = decryptionStream.Read(decryptedPlainText, 0, decryptedPlainText.Length);
+
+                    Assert.Equal(plainText.Length, numberOfBytesOutput);
                     Assert.Equal(plainText, decryptedPlainText);
                 }
             }

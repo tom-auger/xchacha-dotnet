@@ -7,39 +7,50 @@ namespace XChaChaDotNet.UnitTests
 
     public class XChaChaEncryptionStreamTests
     {
+        private const int HeaderLength = 24;
+        private const int ABytes = 17;
+
         [Fact]
         public void Test_Encrypt_DoesNotFail()
         {
+            var plainText = Encoding.UTF8.GetBytes("banana");
             using (var outputStream = new MemoryStream())
             {
                 var key = XChaChaKeyGenerator.GenerateKey();
                 using (var cipherStream = new XChaChaEncryptionStream(outputStream, key))
                 {
-                    var plainText = Encoding.UTF8.GetBytes("banana");
                     cipherStream.Write(plainText, 0, plainText.Length);
                 }
 
                 var cipherText = outputStream.ToArray();
-                Assert.NotEmpty(cipherText);
+
+                // The encryption stream encrypts in 128KB blocks
+                const int numberOfBlocks = 1;
+                var expectedCipherTextLength = plainText.Length + HeaderLength + (ABytes * numberOfBlocks);
+                Assert.Equal(expectedCipherTextLength, cipherText.Length);
             }
         }
 
         [Fact]
         public void Test_Encrypt_DoesNotFail_WithLargeData()
         {
+            var plainText = new byte[1024 * 1024];
             using (var outputStream = new MemoryStream())
             {
                 var key = XChaChaKeyGenerator.GenerateKey();
                 using (var cipherStream = new XChaChaEncryptionStream(outputStream, key))
                 {
-                    var plainText = new byte[1024 * 1024];
                     Array.Fill(plainText, (byte)0x7);
 
                     cipherStream.Write(plainText, 0, plainText.Length);
                 }
 
                 var cipherText = outputStream.ToArray();
-                Assert.NotEmpty(cipherText);
+
+                // The encryption stream encrypts in 128KB blocks
+                var numberOfBlocks = 1024 / 128;
+                var expectedCipherTextLength = plainText.Length + HeaderLength + (ABytes * numberOfBlocks);
+                Assert.Equal(expectedCipherTextLength, cipherText.Length);
             }
         }
 
@@ -57,7 +68,8 @@ namespace XChaChaDotNet.UnitTests
                 }
 
                 var cipherText = outputStream.ToArray();
-                Assert.Equal(24, cipherText.Length);
+
+                Assert.Equal(HeaderLength, cipherText.Length);
             }
         }
 
@@ -75,7 +87,7 @@ namespace XChaChaDotNet.UnitTests
                     cipherStream.Flush();
 
                     var cipherText = outputStream.ToArray();
-                    Assert.Equal(24, cipherText.Length);
+                    Assert.Equal(HeaderLength, cipherText.Length);
                 }
             }
         }
