@@ -97,7 +97,7 @@ namespace XChaChaDotNet
                 var decryptResult = crypto_secretstream_xchacha20poly1305_pull(
                     this.state,
                     ref MemoryMarshal.GetReference(this.outBuffer.AsSpan()),
-                    out var messageLength,
+                    out var decryptedBlockLongLength,
                     out var tag,
                     in MemoryMarshal.GetReference(this.inBuffer.AsReadOnlySpan()),
                     (UInt64)bytesRead,
@@ -111,17 +111,17 @@ namespace XChaChaDotNet
                 this.tagOfLastProcessedBlock = tag;
 
                 // Output the plaintext
-                var numberOfBytesToOutput = Math.Min(count, (int)messageLength);
+                var decryptedBlockLength = (int)decryptedBlockLongLength;
+                var numberOfBytesToOutput = Math.Min(count, decryptedBlockLength);
                 Array.Copy(this.outBuffer, 0, buffer, offset, numberOfBytesToOutput);
 
                 this.outBufferPosition =
-                    numberOfBytesToOutput < BlockLength
+                    numberOfBytesToOutput < decryptedBlockLength
                     ? numberOfBytesToOutput
                     : 0;
 
                 offset += numberOfBytesToOutput;
                 count -= numberOfBytesToOutput;
-
                 totalBytesOutput += numberOfBytesToOutput;
             }
 
