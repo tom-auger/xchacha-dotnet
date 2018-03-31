@@ -3,6 +3,7 @@ namespace XChaChaDotNet
     using System;
     using System.IO;
     using System.Runtime.InteropServices;
+    using System.Security.Cryptography;
     using static SodiumInterop;
 
     public class XChaChaEncryptionStream : Stream
@@ -33,7 +34,7 @@ namespace XChaChaDotNet
             var initResult = crypto_secretstream_xchacha20poly1305_init_push(this.state, this.outBuffer, key.ToArray());
 
             if (initResult != 0)
-                throw new Exception("crypto stream initialization failed");
+                throw new CryptographicException("crypto stream initialization failed");
         }
 
         public override bool CanRead => false;
@@ -168,7 +169,7 @@ namespace XChaChaDotNet
                     0,
                     tag);
 
-            if (encryptionResult != 0) throw new Exception("encryption of block failed");
+            if (encryptionResult != 0) throw new CryptographicException("encryption of block failed");
 
             this.stream.Write(this.outBuffer, 0, (int)cipherTextLength);
             this.inBufferPosition = 0;

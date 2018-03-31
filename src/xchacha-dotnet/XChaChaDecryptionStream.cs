@@ -3,6 +3,7 @@ namespace XChaChaDotNet
     using System;
     using System.IO;
     using System.Runtime.InteropServices;
+    using System.Security.Cryptography;
     using static SodiumInterop;
 
     public class XChaChaDecryptionStream : Stream
@@ -32,12 +33,12 @@ namespace XChaChaDotNet
             // The length of the header is smaller than EncryptedBlockLength so it will fit
             var bytesRead = this.stream.Read(this.inBuffer, 0, crypto_secretstream_xchacha20poly1305_HEADERBYTES);
             if (bytesRead != crypto_secretstream_xchacha20poly1305_HEADERBYTES)
-                throw new Exception("invalid or corrupt header");
+                throw new CryptographicException("invalid or corrupt header");
 
             var initResult = crypto_secretstream_xchacha20poly1305_init_pull(this.state, this.inBuffer, key.ToArray());
 
             if (initResult != 0)
-                throw new Exception("crypto stream initialization failed");
+                throw new CryptographicException("crypto stream initialization failed");
         }
 
         public override bool CanRead => !this.isClosed && this.stream.CanRead;
@@ -105,7 +106,7 @@ namespace XChaChaDotNet
                     0);
 
                 // Throw an error if the decrypt failed
-                if (decryptResult != 0) throw new Exception("block is invalid or corrupt");
+                if (decryptResult != 0) throw new CryptographicException("block is invalid or corrupt");
 
                 // Remember the tag in case we want to verify it later
                 this.tagOfLastProcessedBlock = tag;
