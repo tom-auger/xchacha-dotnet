@@ -11,7 +11,7 @@ namespace XChaChaDotNet.UnitTests
         private const int ABytes = 17;
 
         [Fact]
-        public void Test_Encrypt_DoesNotFail()
+        public void Test_Encrypt_ProducesCorrectOutputLength()
         {
             var plainText = Encoding.UTF8.GetBytes("banana");
             using (var outputStream = new MemoryStream())
@@ -32,7 +32,7 @@ namespace XChaChaDotNet.UnitTests
         }
 
         [Fact]
-        public void Test_Encrypt_DoesNotFail_WithLargeData()
+        public void Test_Encrypt_WithLargeData_ProducesCorrectOutputLength()
         {
             var plainText = new byte[1024 * 1024];
             using (var outputStream = new MemoryStream())
