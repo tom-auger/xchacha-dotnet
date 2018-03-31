@@ -35,13 +35,13 @@ namespace XChaChaDotNet.UnitTests
         public void Test_Encrypt_WithLargeData_ProducesCorrectOutputLength()
         {
             var plainText = new byte[1024 * 1024];
+            RandomBytesGenerator.NextBytes(plainText);
+            
             using (var outputStream = new MemoryStream())
             {
                 var key = XChaChaKeyGenerator.GenerateKey();
                 using (var cipherStream = new XChaChaEncryptionStream(outputStream, key))
                 {
-                    Array.Fill(plainText, (byte)0x7);
-
                     cipherStream.Write(plainText, 0, plainText.Length);
                 }
 

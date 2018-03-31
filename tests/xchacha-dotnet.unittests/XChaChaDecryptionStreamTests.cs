@@ -40,7 +40,7 @@ namespace XChaChaDotNet.UnitTests
             {
                 var key = XChaChaKeyGenerator.GenerateKey();
                 var plainText = new byte[1024 * 1024];
-                Array.Fill(plainText, (byte)0x7);
+                RandomBytesGenerator.NextBytes(plainText);
 
                 using (var cipherStream = new XChaChaEncryptionStream(cipherTextStream, key))
                 {
@@ -66,7 +66,7 @@ namespace XChaChaDotNet.UnitTests
             {
                 var key = XChaChaKeyGenerator.GenerateKey();
                 var plainText = new byte[1024 * 1024];
-                Array.Fill(plainText, (byte)0x7);
+                RandomBytesGenerator.NextBytes(plainText);
 
                 using (var cipherStream = new XChaChaEncryptionStream(cipherTextStream, key))
                 {
@@ -118,7 +118,7 @@ namespace XChaChaDotNet.UnitTests
             {
                 var key = XChaChaKeyGenerator.GenerateKey();
                 var plainText = new byte[1024 * 1024];
-                Array.Fill(plainText, (byte)0x7);
+                RandomBytesGenerator.NextBytes(plainText);
 
                 using (var cipherStream = new XChaChaEncryptionStream(cipherTextStream, key))
                 {

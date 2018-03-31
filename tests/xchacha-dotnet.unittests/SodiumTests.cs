@@ -6,7 +6,7 @@ namespace XChaChaDotNet.UnitTests
     public class SodiumTests
     {
         [Fact]
-        public void Test_SodiumInitialiszedSuccessfully()
+        public void Test_SodiumInitializedSuccessfully()
         {
             Assert.True(Sodium.InitializedSuccessfully);
         }
