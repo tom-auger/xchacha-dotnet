@@ -7,9 +7,11 @@ namespace XChaChaDotNet.UnitTests
     {
         private static readonly Random random = new Random(DateTime.Now.Millisecond);
 
-        public static void NextBytes(Span<byte> bytes)
+        public static Span<byte> NextBytes(int length)
         {
-            random.NextBytes(bytes);
+            var buffer = new byte[length];
+            random.NextBytes(buffer);
+            return buffer;
         }
     }
 }

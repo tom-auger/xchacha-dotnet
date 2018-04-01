@@ -34,15 +34,14 @@ namespace XChaChaDotNet.UnitTests
         [Fact]
         public void Test_Encrypt_WithLargeData_ProducesCorrectOutputLength()
         {
-            var plainText = new byte[1024 * 1024];
-            RandomBytesGenerator.NextBytes(plainText);
+            var plainText = RandomBytesGenerator.NextBytes(1024 * 1024);
 
             using (var outputStream = new MemoryStream())
             {
                 var key = XChaChaKeyGenerator.GenerateKey();
                 using (var cipherStream = new XChaChaEncryptionStream(outputStream, key))
                 {
-                    cipherStream.Write(plainText, 0, plainText.Length);
+                    cipherStream.Write(plainText);
                 }
 
                 var cipherText = outputStream.ToArray();
@@ -95,13 +94,9 @@ namespace XChaChaDotNet.UnitTests
         [Fact]
         public void Test_Encrypt_WriteDifferentAmountsToStream()
         {
-            var plainText1 = new byte[157 * 1024];
-            var plainText2 = new byte[314 * 1024];
-            var plaintext3 = new byte[273 * 1024];
-
-            RandomBytesGenerator.NextBytes(plainText1);
-            RandomBytesGenerator.NextBytes(plainText2);
-            RandomBytesGenerator.NextBytes(plaintext3);
+            var plainText1 = RandomBytesGenerator.NextBytes(157 * 1024);
+            var plainText2 = RandomBytesGenerator.NextBytes(314 * 1024);
+            var plaintext3 = RandomBytesGenerator.NextBytes(273 * 1024);
 
             var totalPlainTextLength = plainText1.Length + plainText2.Length + plaintext3.Length;
             // The encryption stream encrypts in 128KB blocks
