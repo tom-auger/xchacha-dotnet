@@ -36,7 +36,7 @@ namespace XChaChaDotNet.UnitTests
         {
             var plainText = new byte[1024 * 1024];
             RandomBytesGenerator.NextBytes(plainText);
-            
+
             using (var outputStream = new MemoryStream())
             {
                 var key = XChaChaKeyGenerator.GenerateKey();
@@ -89,6 +89,38 @@ namespace XChaChaDotNet.UnitTests
                     var cipherText = outputStream.ToArray();
                     Assert.Equal(HeaderLength, cipherText.Length);
                 }
+            }
+        }
+
+        [Fact]
+        public void Test_Encrypt_WriteDifferentAmountsToStream()
+        {
+            var plainText1 = new byte[157 * 1024];
+            var plainText2 = new byte[314 * 1024];
+            var plaintext3 = new byte[273 * 1024];
+
+            RandomBytesGenerator.NextBytes(plainText1);
+            RandomBytesGenerator.NextBytes(plainText2);
+            RandomBytesGenerator.NextBytes(plaintext3);
+
+            var totalPlainTextLength = plainText1.Length + plainText2.Length + plaintext3.Length;
+            // The encryption stream encrypts in 128KB blocks
+            const int numberOfBlocks = 6;
+            var expectedOutputLength = HeaderLength + totalPlainTextLength + (numberOfBlocks * ABytes);
+
+            using (var outputStream = new MemoryStream())
+            {
+                var key = XChaChaKeyGenerator.GenerateKey();
+                using (var cipherStream = new XChaChaEncryptionStream(outputStream, key))
+                {
+                    cipherStream.Write(plainText1);
+                    cipherStream.Write(plainText2);
+                    cipherStream.Write(plaintext3);
+                }
+
+                var cipherText = outputStream.ToArray();
+
+                Assert.Equal(expectedOutputLength, cipherText.Length);
             }
         }
     }
