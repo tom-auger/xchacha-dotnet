@@ -4,6 +4,7 @@ namespace XChaChaDotNet
     using System.IO;
     using System.Security.Cryptography;
     using System;
+    using System.Buffers;
     using static SodiumInterop;
 
     public class XChaChaStream : XChaChaStreamBase
@@ -15,27 +16,33 @@ namespace XChaChaDotNet
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (!this.CanRead) throw new NotSupportedException();
-
             var inputSize = count + crypto_secretstream_xchacha20poly1305_ABYTES;
-            Span<byte> inBuffer = new byte[inputSize];
+            var ciphertextBuffer = ArrayPool<byte>.Shared.Rent(inputSize);
 
-            var bytesRead = this.stream.Read(inBuffer);
+            try
+            {
+                if (!this.CanRead) throw new NotSupportedException();
 
-            var decryptResult = crypto_secretstream_xchacha20poly1305_pull(
-                   this.state,
-                   ref MemoryMarshal.GetReference(buffer.AsSpan()),
-                   out var decryptedBlockLongLength,
-                   out var tag,
-                   in MemoryMarshal.GetReference(inBuffer),
-                   (UInt64)bytesRead,
-                   IntPtr.Zero,
-                   0);
+                var bytesRead = this.stream.Read(ciphertextBuffer, 0, inputSize);
+                var decryptResult = crypto_secretstream_xchacha20poly1305_pull(
+                       this.state,
+                       ref MemoryMarshal.GetReference(buffer.AsSpan()),
+                       out var decryptedBlockLongLength,
+                       out var tag,
+                       in MemoryMarshal.GetReference(ciphertextBuffer.AsReadOnlySpan()),
+                       (UInt64)bytesRead,
+                       IntPtr.Zero,
+                       0);
 
-            if (decryptResult != 0) throw new CryptographicException("block is invalid or corrupt");
-            this.tagOfLastDecryptedBlock = tag;
+                if (decryptResult != 0) throw new CryptographicException("block is invalid or corrupt");
+                this.tagOfLastDecryptedBlock = tag;
 
-            return (int)decryptedBlockLongLength;
+                return (int)decryptedBlockLongLength;
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(ciphertextBuffer);
+            }
         }
 
         public override void Write(byte[] buffer, int offset, int count)
@@ -68,21 +75,28 @@ namespace XChaChaDotNet
             if (count > 0)
             {
                 var outputSize = count + crypto_secretstream_xchacha20poly1305_ABYTES;
-                Span<byte> outBuffer = new byte[outputSize];
+                var ciphertextBuffer = ArrayPool<byte>.Shared.Rent(outputSize);
 
-                var encryptionResult = crypto_secretstream_xchacha20poly1305_push(
-                       this.state,
-                       ref MemoryMarshal.GetReference(outBuffer),
-                       out var _,
-                       in MemoryMarshal.GetReference(buffer.AsReadOnlySpan()),
-                       (ulong)count,
-                       IntPtr.Zero,
-                       0,
-                       tag);
+                try
+                {
+                    var encryptionResult = crypto_secretstream_xchacha20poly1305_push(
+                           this.state,
+                           ref MemoryMarshal.GetReference(ciphertextBuffer.AsSpan()),
+                           out var ciphertextLength,
+                           in MemoryMarshal.GetReference(buffer.AsReadOnlySpan()),
+                           (ulong)count,
+                           IntPtr.Zero,
+                           0,
+                           tag);
 
-                if (encryptionResult != 0) throw new CryptographicException("encryption of block failed");
+                    if (encryptionResult != 0) throw new CryptographicException("encryption of block failed");
 
-                this.stream.Write(outBuffer);
+                    this.stream.Write(ciphertextBuffer, 0, (int)ciphertextLength);
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(ciphertextBuffer);
+                }
             }
         }
 

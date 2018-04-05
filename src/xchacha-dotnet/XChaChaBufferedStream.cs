@@ -1,6 +1,7 @@
 namespace XChaChaDotNet
 {
     using System;
+    using System.Buffers;
     using System.IO;
     using System.Runtime.InteropServices;
     using System.Security.Cryptography;
@@ -13,8 +14,8 @@ namespace XChaChaDotNet
             PlaintextBufferLength + crypto_secretstream_xchacha20poly1305_ABYTES;
 
         private int plaintextBufferPosition;
-        private byte[] plaintextBuffer = new byte[PlaintextBufferLength];
-        private byte[] ciphertextBuffer = new byte[CiphertextBufferLength];
+        private byte[] plaintextBuffer = ArrayPool<byte>.Shared.Rent(PlaintextBufferLength);
+        private byte[] ciphertextBuffer = ArrayPool<byte>.Shared.Rent(CiphertextBufferLength);
 
         public XChaChaBufferedStream(Stream stream, ReadOnlySpan<byte> key, EncryptionMode encryptionMode)
             : base(stream, key, encryptionMode)
@@ -50,7 +51,7 @@ namespace XChaChaDotNet
                 }
 
                 // Read the next block from the stream
-                var bytesRead = this.stream.Read(this.ciphertextBuffer);
+                var bytesRead = this.stream.Read(this.ciphertextBuffer, 0, CiphertextBufferLength);
 
                 // Stop if we've already reached the end of the stream
                 if (bytesRead == 0) break;
@@ -162,6 +163,8 @@ namespace XChaChaDotNet
                 this.EncryptPlainTextBuffer(crypto_secretstream_xchacha20poly1305_TAG_FINAL);
                 base.Close();
                 Marshal.FreeHGlobal(this.state);
+                ArrayPool<byte>.Shared.Return(this.plaintextBuffer);
+                ArrayPool<byte>.Shared.Return(this.ciphertextBuffer);
                 isClosed = true;
             }
         }
