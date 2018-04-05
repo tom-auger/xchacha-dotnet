@@ -13,6 +13,10 @@ namespace XChaChaDotNet
         protected readonly Stream stream;
         protected byte[] headerBuffer = new byte[crypto_secretstream_xchacha20poly1305_HEADERBYTES];
         
+        protected bool isClosed;
+        protected bool headerWritten;
+        protected byte tagOfLastDecryptedBlock;
+        
         protected XChaChaStreamBase(Stream stream, ReadOnlySpan<byte> key, EncryptionMode encryptionMode)
         {
             this.stream = stream ?? throw new ArgumentNullException(nameof(stream));
@@ -40,6 +44,5 @@ namespace XChaChaDotNet
             if (initResult != 0)
                 throw new CryptographicException("crypto stream initialization failed");
         }
-
     }
 }

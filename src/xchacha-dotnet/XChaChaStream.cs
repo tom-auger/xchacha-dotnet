@@ -8,11 +8,6 @@ namespace XChaChaDotNet
 
     public class XChaChaStream : XChaChaStreamBase
     {
-        private bool isClosed;
-        private byte tagOfLastDecryptedBlock;
-
-        private bool headerWritten;
-
         public XChaChaStream(Stream stream, ReadOnlySpan<byte> key, EncryptionMode encryptionMode)
             : base(stream, key, encryptionMode)
         {

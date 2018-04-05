@@ -12,12 +12,9 @@ namespace XChaChaDotNet
         private const int EncryptedBlockLength = BlockLength + crypto_secretstream_xchacha20poly1305_ABYTES;
         
 
-        private bool isClosed;
-        private bool headerWritten;
         private int plaintextBufferPosition;
         private byte[] plaintextBuffer = new byte[BlockLength];
         private byte[] ciphertextBuffer = new byte[EncryptedBlockLength];
-        private byte tagOfLastProcessedBlock;
 
         public XChaChaBufferedStream(Stream stream, ReadOnlySpan<byte> key, EncryptionMode encryptionMode)
             : base(stream, key, encryptionMode)
@@ -105,7 +102,7 @@ namespace XChaChaDotNet
                 if (decryptResult != 0) throw new CryptographicException("block is invalid or corrupt");
 
                 // Remember the tag in case we want to verify it later
-                this.tagOfLastProcessedBlock = tag;
+                this.tagOfLastDecryptedBlock = tag;
 
                 // Output the plaintext
                 var decryptedBlockLength = (int)decryptedBlockLongLength;
@@ -237,6 +234,6 @@ namespace XChaChaDotNet
         }
 
         public bool VerifyEndOfCipherStream()
-           => this.tagOfLastProcessedBlock == crypto_secretstream_xchacha20poly1305_TAG_FINAL;
+           => this.tagOfLastDecryptedBlock == crypto_secretstream_xchacha20poly1305_TAG_FINAL;
     }
 }
