@@ -22,7 +22,7 @@ namespace XChaChaDotNet.Benchmarks
 
             using (var devNull = new DevNullStream())
             {
-                using (var encryptionStream = new XChaChaEncryptionStream(devNull, key))
+                using (var encryptionStream = new XChaChaBufferedStream(devNull, key, EncryptionMode.Encrypt))
                 {
                     encryptionStream.Write(data);
                 }
