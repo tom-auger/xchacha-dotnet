@@ -92,13 +92,13 @@ namespace XChaChaDotNet
             var totalBytesOutput = 0;
             while (count > 0)
             {
-                // If there's any data left in the outBuffer then output this first
+                // If there's any data left in the plaintextBuffer then output this first
                 if (this.plaintextBufferPosition > 0)
                 {
-                    var numberOfBytesLeftInOutBuffer =
+                    var numBytesLeftInPlaintextBuffer =
                         this.plaintextBuffer.Length - this.plaintextBufferPosition;
 
-                    var numberOfBufferedBytesToOutput = Math.Min(numberOfBytesLeftInOutBuffer, count);
+                    var numberOfBufferedBytesToOutput = Math.Min(numBytesLeftInPlaintextBuffer, count);
 
                     Array.Copy(this.plaintextBuffer, this.plaintextBufferPosition, buffer, offset, numberOfBufferedBytesToOutput);
 
@@ -169,17 +169,17 @@ namespace XChaChaDotNet
 
             while (count > 0)
             {
-                // Consume what's in the buffer first before processing new data
-                var remainingInBufferCapacity = BlockLength - this.plaintextBufferPosition;
-                var inBufferIsFull = remainingInBufferCapacity == 0;
-                var inBufferIsEmpty = remainingInBufferCapacity == BlockLength;
+                // Consume what's in the plaintextBbuffer first before processing new data
+                var remainingPlaintextBufferCapacity = this.plaintextBuffer.Length - this.plaintextBufferPosition;
+                var plaintextBufferIsFull = remainingPlaintextBufferCapacity == 0;
+                var plaintextBufferIsEmpty = remainingPlaintextBufferCapacity == BlockLength;
 
-                if (inBufferIsFull)
+                if (plaintextBufferIsFull)
                 {
                     // Buffer is full, so process it first
                     this.EncryptPlainTextBuffer(crypto_secretstream_xchacha20poly1305_TAG_MESSAGE);
                 }
-                else if (inBufferIsEmpty)
+                else if (plaintextBufferIsEmpty)
                 {
                     // Buffer is empty, so process as much as possible and store the remainder in the buffer
                     if (count > BlockLength)
@@ -202,7 +202,7 @@ namespace XChaChaDotNet
                 else
                 {
                     // Attempt to fill the buffer first before processing
-                    var bytesToRead = Math.Min(count, remainingInBufferCapacity);
+                    var bytesToRead = Math.Min(count, remainingPlaintextBufferCapacity);
                     Array.Copy(buffer, this.plaintextBuffer, bytesToRead);
                     this.plaintextBufferPosition += bytesToRead;
                     count -= bytesToRead;
