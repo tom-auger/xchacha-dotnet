@@ -6,14 +6,11 @@ namespace XChaChaDotNet
     using System.Security.Cryptography;
     using static SodiumInterop;
 
-    public class XChaChaBufferedStream : Stream
+    public class XChaChaBufferedStream : XChaChaStreamBase
     {
         private const int BlockLength = 128 * 1024;
         private const int EncryptedBlockLength = BlockLength + crypto_secretstream_xchacha20poly1305_ABYTES;
-
-        private readonly Stream stream;
-        private readonly EncryptionMode encryptionMode;
-        private readonly IntPtr state;
+        
 
         private bool isClosed;
         private bool headerWritten;
@@ -23,34 +20,8 @@ namespace XChaChaDotNet
         private byte tagOfLastProcessedBlock;
 
         public XChaChaBufferedStream(Stream stream, ReadOnlySpan<byte> key, EncryptionMode encryptionMode)
+            : base(stream, key, encryptionMode)
         {
-            this.stream = stream ?? throw new ArgumentNullException(nameof(stream));
-            this.encryptionMode = encryptionMode;
-
-            if (key.Length != crypto_secretstream_xchacha20poly1305_KEYBYTES)
-                throw new ArgumentException("key has invalid length", nameof(key));
-
-            this.state =
-                Marshal.AllocHGlobal(Marshal.SizeOf<crypto_secretstream_xchacha20poly1305_state>());
-
-            int initResult;
-            if (encryptionMode == EncryptionMode.Encrypt)
-            {
-                // The length of the header is smaller than EncryptedBlockLength so it will fit
-                initResult = crypto_secretstream_xchacha20poly1305_init_push(this.state, this.ciphertextBuffer, key.ToArray());
-            }
-            else
-            {
-                // The length of the header is smaller than EncryptedBlockLength so it will fit
-                var bytesRead = this.stream.Read(this.ciphertextBuffer, 0, crypto_secretstream_xchacha20poly1305_HEADERBYTES);
-                if (bytesRead != crypto_secretstream_xchacha20poly1305_HEADERBYTES)
-                    throw new CryptographicException("invalid or corrupt header");
-
-                initResult = crypto_secretstream_xchacha20poly1305_init_pull(this.state, this.ciphertextBuffer, key.ToArray());
-            }
-
-            if (initResult != 0)
-                throw new CryptographicException("crypto stream initialization failed");
         }
 
         public override bool CanRead =>
@@ -224,7 +195,7 @@ namespace XChaChaDotNet
 
         private void EncryptHeader()
         {
-            this.stream.Write(this.ciphertextBuffer, 0, crypto_secretstream_xchacha20poly1305_HEADERBYTES);
+            this.stream.Write(this.headerBuffer);
             this.headerWritten = true;
         }
 

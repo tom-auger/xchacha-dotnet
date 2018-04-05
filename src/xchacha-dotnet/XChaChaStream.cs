@@ -6,44 +6,16 @@ namespace XChaChaDotNet
     using System;
     using static SodiumInterop;
 
-    public class XChaChaStream : Stream
+    public class XChaChaStream : XChaChaStreamBase
     {
-        private readonly Stream stream;
-        private readonly EncryptionMode encryptionMode;
-        private readonly IntPtr state;
-
         private bool isClosed;
         private byte tagOfLastDecryptedBlock;
 
         private bool headerWritten;
-        private byte[] headerBuffer = new byte[crypto_secretstream_xchacha20poly1305_HEADERBYTES];
 
         public XChaChaStream(Stream stream, ReadOnlySpan<byte> key, EncryptionMode encryptionMode)
+            : base(stream, key, encryptionMode)
         {
-            this.stream = stream ?? throw new ArgumentNullException(nameof(stream));
-            this.encryptionMode = encryptionMode;
-
-            if (key.Length != crypto_secretstream_xchacha20poly1305_KEYBYTES)
-                throw new ArgumentException("key has invalid length", nameof(key));
-
-            this.state = Marshal.AllocHGlobal(Marshal.SizeOf<crypto_secretstream_xchacha20poly1305_state>());
-
-            int initResult;
-            if (encryptionMode == EncryptionMode.Encrypt)
-            {
-                initResult = crypto_secretstream_xchacha20poly1305_init_push(this.state, this.headerBuffer, key.ToArray());
-            }
-            else
-            {
-                var bytesRead = this.stream.Read(this.headerBuffer);
-                if (bytesRead != this.headerBuffer.Length)
-                    throw new CryptographicException("invalid or corrupt header");
-
-                initResult = crypto_secretstream_xchacha20poly1305_init_pull(this.state, this.headerBuffer, key.ToArray());
-            }
-
-            if (initResult != 0)
-                throw new CryptographicException("crypto stream initialization failed");
         }
 
         public override bool CanRead =>
@@ -159,7 +131,7 @@ namespace XChaChaDotNet
             }
         }
 
-        public bool VerifyEndOfCipherStream()
-          => this.tagOfLastDecryptedBlock == crypto_secretstream_xchacha20poly1305_TAG_FINAL;
+        public bool VerifyEndOfCipherStream() => 
+            this.tagOfLastDecryptedBlock == crypto_secretstream_xchacha20poly1305_TAG_FINAL;
     }
 }
