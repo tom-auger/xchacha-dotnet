@@ -8,12 +8,13 @@ namespace XChaChaDotNet
 
     public class XChaChaBufferedStream : XChaChaStreamBase
     {
-        private const int BlockLength = 128 * 1024;
-        private const int EncryptedBlockLength = BlockLength + crypto_secretstream_xchacha20poly1305_ABYTES;
+        private const int PlaintextBufferLength = 128 * 1024;
+        private const int CiphertextBufferLength = 
+            PlaintextBufferLength + crypto_secretstream_xchacha20poly1305_ABYTES;
 
         private int plaintextBufferPosition;
-        private byte[] plaintextBuffer = new byte[BlockLength];
-        private byte[] ciphertextBuffer = new byte[EncryptedBlockLength];
+        private byte[] plaintextBuffer = new byte[PlaintextBufferLength];
+        private byte[] ciphertextBuffer = new byte[CiphertextBufferLength];
 
         public XChaChaBufferedStream(Stream stream, ReadOnlySpan<byte> key, EncryptionMode encryptionMode)
             : base(stream, key, encryptionMode)
@@ -43,7 +44,7 @@ namespace XChaChaDotNet
                 if (this.plaintextBufferPosition > 0)
                 {
                     var numBytesLeftInPlaintextBuffer =
-                        this.plaintextBuffer.Length - this.plaintextBufferPosition;
+                        PlaintextBufferLength - this.plaintextBufferPosition;
 
                     var numberOfBufferedBytesToOutput = Math.Min(numBytesLeftInPlaintextBuffer, count);
 
@@ -54,7 +55,7 @@ namespace XChaChaDotNet
                     count -= numberOfBufferedBytesToOutput;
                     totalBytesOutput += numberOfBufferedBytesToOutput;
 
-                    if (this.plaintextBufferPosition == this.plaintextBuffer.Length)
+                    if (this.plaintextBufferPosition == PlaintextBufferLength)
                         this.plaintextBufferPosition = 0;
 
                     continue;
@@ -113,9 +114,9 @@ namespace XChaChaDotNet
             while (count > 0)
             {
                 // Consume what's in the plaintextBbuffer first before processing new data
-                var remainingPlaintextBufferCapacity = this.plaintextBuffer.Length - this.plaintextBufferPosition;
+                var remainingPlaintextBufferCapacity = PlaintextBufferLength - this.plaintextBufferPosition;
                 var plaintextBufferIsFull = remainingPlaintextBufferCapacity == 0;
-                var plaintextBufferIsEmpty = remainingPlaintextBufferCapacity == BlockLength;
+                var plaintextBufferIsEmpty = remainingPlaintextBufferCapacity == PlaintextBufferLength;
 
                 if (plaintextBufferIsFull)
                 {
@@ -125,13 +126,13 @@ namespace XChaChaDotNet
                 else if (plaintextBufferIsEmpty)
                 {
                     // Buffer is empty, so process as much as possible and store the remainder in the buffer
-                    if (count > BlockLength)
+                    if (count > PlaintextBufferLength)
                     {
                         // There is more than one block left to go so process it immediately and circumvent the buffer
-                        var block = buffer.AsReadOnlySpan().Slice(offset, BlockLength);
+                        var block = buffer.AsReadOnlySpan().Slice(offset, PlaintextBufferLength);
                         this.EncryptBlock(block, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE);
-                        count -= BlockLength;
-                        offset += BlockLength;
+                        count -= PlaintextBufferLength;
+                        offset += PlaintextBufferLength;
                     }
                     else
                     {

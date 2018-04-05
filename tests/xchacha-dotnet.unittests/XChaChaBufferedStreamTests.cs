@@ -228,7 +228,7 @@ namespace XChaChaDotNet.UnitTests
         }
 
         [Fact]
-        public void Test_Decrypt_DecryptsLargeData()
+        public void Test_Decrypt_DecryptsLargeBlock()
         {
             using (var cipherTextStream = new MemoryStream())
             {
