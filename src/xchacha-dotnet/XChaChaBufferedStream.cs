@@ -9,7 +9,7 @@ namespace XChaChaDotNet
     public class XChaChaBufferedStream : XChaChaStreamBase
     {
         private const int PlaintextBufferLength = 128 * 1024;
-        private const int CiphertextBufferLength = 
+        private const int CiphertextBufferLength =
             PlaintextBufferLength + crypto_secretstream_xchacha20poly1305_ABYTES;
 
         private int plaintextBufferPosition;
@@ -19,18 +19,6 @@ namespace XChaChaDotNet
         public XChaChaBufferedStream(Stream stream, ReadOnlySpan<byte> key, EncryptionMode encryptionMode)
             : base(stream, key, encryptionMode)
         {
-        }
-
-        public override void Flush()
-        {
-            if (this.encryptionMode == EncryptionMode.Encrypt)
-                this.EncryptPlainTextBuffer(crypto_secretstream_xchacha20poly1305_TAG_MESSAGE);
-        }
-
-        public void FlushFinal()
-        {
-            if (this.encryptionMode == EncryptionMode.Encrypt)
-                this.EncryptPlainTextBuffer(crypto_secretstream_xchacha20poly1305_TAG_FINAL);
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -153,6 +141,18 @@ namespace XChaChaDotNet
                     offset += bytesToRead;
                 }
             }
+        }
+
+        public override void Flush()
+        {
+            if (this.encryptionMode == EncryptionMode.Encrypt)
+                this.EncryptPlainTextBuffer(crypto_secretstream_xchacha20poly1305_TAG_MESSAGE);
+        }
+
+        public void FlushFinal()
+        {
+            if (this.encryptionMode == EncryptionMode.Encrypt)
+                this.EncryptPlainTextBuffer(crypto_secretstream_xchacha20poly1305_TAG_FINAL);
         }
 
         public override void Close()

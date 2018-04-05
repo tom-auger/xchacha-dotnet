@@ -13,14 +13,6 @@ namespace XChaChaDotNet
         {
         }
 
-        public override void Flush()
-        {
-            if (this.encryptionMode == EncryptionMode.Encrypt && !this.headerWritten)
-            {
-                this.WriteHeader();
-            }
-        }
-
         public override int Read(byte[] buffer, int offset, int count)
         {
             if (!this.CanRead) throw new NotSupportedException();
@@ -54,6 +46,14 @@ namespace XChaChaDotNet
         public void WriteFinal(byte[] buffer, int offset, int count)
         {
             this.EncryptBlock(buffer, offset, count, crypto_secretstream_xchacha20poly1305_TAG_FINAL);
+        }
+
+        public override void Flush()
+        {
+            if (this.encryptionMode == EncryptionMode.Encrypt && !this.headerWritten)
+            {
+                this.WriteHeader();
+            }
         }
 
         private void EncryptBlock(byte[] buffer, int offset, int count, byte tag)
