@@ -1,10 +1,10 @@
 namespace XChaChaDotNet
 {
-    using System.Runtime.InteropServices;
-    using System.IO;
-    using System.Security.Cryptography;
     using System;
     using System.Buffers;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using System.Security.Cryptography;
     using static SodiumInterop;
 
     public class XChaChaStream : XChaChaStreamBase
@@ -53,6 +53,20 @@ namespace XChaChaDotNet
         public void WriteFinal(byte[] buffer, int offset, int count)
         {
             this.EncryptBlock(buffer, offset, count, crypto_secretstream_xchacha20poly1305_TAG_FINAL);
+        }
+
+        public void WriteFinal(ReadOnlySpan<byte> buffer)
+        {
+            var plaintextBuffer = ArrayPool<byte>.Shared.Rent(buffer.Length);
+            try
+            {
+                buffer.CopyTo(plaintextBuffer);
+                this.WriteFinal(plaintextBuffer, 0, buffer.Length);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(plaintextBuffer);
+            }
         }
 
         public override void Flush()
