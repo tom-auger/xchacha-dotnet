@@ -13,26 +13,6 @@ namespace XChaChaDotNet
         {
         }
 
-        public override bool CanRead =>
-            this.encryptionMode == EncryptionMode.Decrypt &&
-            !this.isClosed &&
-            this.stream.CanRead;
-
-        public override bool CanSeek => false;
-
-        public override bool CanWrite =>
-            this.encryptionMode == EncryptionMode.Encrypt &&
-            !this.isClosed &&
-            this.stream.CanWrite;
-
-        public override long Length => throw new NotSupportedException();
-
-        public override long Position
-        {
-            get => throw new NotSupportedException();
-            set => throw new NotSupportedException();
-        }
-
         public override void Flush()
         {
             if (this.encryptionMode == EncryptionMode.Encrypt && !this.headerWritten)
@@ -65,10 +45,6 @@ namespace XChaChaDotNet
 
             return (int)decryptedBlockLongLength;
         }
-
-        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
-
-        public override void SetLength(long value) => throw new NotSupportedException();
 
         public override void Write(byte[] buffer, int offset, int count)
         {
@@ -125,8 +101,5 @@ namespace XChaChaDotNet
                 isClosed = true;
             }
         }
-
-        public bool VerifyEndOfCipherStream() => 
-            this.tagOfLastDecryptedBlock == crypto_secretstream_xchacha20poly1305_TAG_FINAL;
     }
 }

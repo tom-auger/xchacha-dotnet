@@ -8,15 +8,16 @@ namespace XChaChaDotNet
 
     public abstract class XChaChaStreamBase : Stream
     {
-        protected readonly EncryptionMode encryptionMode;
-        protected readonly IntPtr state;
-        protected readonly Stream stream;
-        protected byte[] headerBuffer = new byte[crypto_secretstream_xchacha20poly1305_HEADERBYTES];
-        
-        protected bool isClosed;
-        protected bool headerWritten;
-        protected byte tagOfLastDecryptedBlock;
-        
+        private protected readonly EncryptionMode encryptionMode;
+        private protected readonly IntPtr state;
+        private protected readonly Stream stream;
+        private protected readonly byte[] headerBuffer =
+            new byte[crypto_secretstream_xchacha20poly1305_HEADERBYTES];
+
+        private protected bool isClosed;
+        private protected bool headerWritten;
+        private protected byte tagOfLastDecryptedBlock;
+
         protected XChaChaStreamBase(Stream stream, ReadOnlySpan<byte> key, EncryptionMode encryptionMode)
         {
             this.stream = stream ?? throw new ArgumentNullException(nameof(stream));
@@ -44,5 +45,32 @@ namespace XChaChaDotNet
             if (initResult != 0)
                 throw new CryptographicException("crypto stream initialization failed");
         }
+
+        public override bool CanRead =>
+            this.encryptionMode == EncryptionMode.Decrypt &&
+            !this.isClosed &&
+            this.stream.CanRead;
+
+        public override bool CanWrite =>
+            this.encryptionMode == EncryptionMode.Encrypt &&
+            !this.isClosed &&
+            this.stream.CanWrite;
+
+        public override bool CanSeek => false;
+
+        public override long Length => throw new NotSupportedException();
+
+        public override long Position
+        {
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
+        }
+
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+
+        public override void SetLength(long value) => throw new NotSupportedException();
+
+        public bool VerifyEndOfCipherStream()
+            => this.tagOfLastDecryptedBlock == crypto_secretstream_xchacha20poly1305_TAG_FINAL;
     }
 }

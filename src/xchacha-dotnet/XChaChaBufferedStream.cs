@@ -10,7 +10,6 @@ namespace XChaChaDotNet
     {
         private const int BlockLength = 128 * 1024;
         private const int EncryptedBlockLength = BlockLength + crypto_secretstream_xchacha20poly1305_ABYTES;
-        
 
         private int plaintextBufferPosition;
         private byte[] plaintextBuffer = new byte[BlockLength];
@@ -19,26 +18,6 @@ namespace XChaChaDotNet
         public XChaChaBufferedStream(Stream stream, ReadOnlySpan<byte> key, EncryptionMode encryptionMode)
             : base(stream, key, encryptionMode)
         {
-        }
-
-        public override bool CanRead =>
-            this.encryptionMode == EncryptionMode.Decrypt &&
-            !this.isClosed &&
-            this.stream.CanRead;
-
-        public override bool CanSeek => false;
-
-        public override bool CanWrite =>
-            this.encryptionMode == EncryptionMode.Encrypt &&
-            !isClosed &&
-            this.stream.CanWrite;
-
-        public override long Length => throw new NotSupportedException();
-
-        public override long Position
-        {
-            get => throw new NotSupportedException();
-            set => throw new NotSupportedException();
         }
 
         public override void Flush()
@@ -121,10 +100,6 @@ namespace XChaChaDotNet
 
             return totalBytesOutput;
         }
-
-        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
-
-        public override void SetLength(long value) => throw new NotSupportedException();
 
         public override void Write(byte[] buffer, int offset, int count)
         {
@@ -232,8 +207,5 @@ namespace XChaChaDotNet
             this.stream.Write(this.ciphertextBuffer, 0, (int)cipherTextLength);
             this.plaintextBufferPosition = 0;
         }
-
-        public bool VerifyEndOfCipherStream()
-           => this.tagOfLastDecryptedBlock == crypto_secretstream_xchacha20poly1305_TAG_FINAL;
     }
 }
