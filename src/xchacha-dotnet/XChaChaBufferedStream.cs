@@ -96,7 +96,7 @@ namespace XChaChaDotNet
 
             if (!this.headerWritten)
             {
-                this.EncryptHeader();
+                this.WriteHeader();
             }
 
             while (count > 0)
@@ -166,7 +166,7 @@ namespace XChaChaDotNet
             }
         }
 
-        private void EncryptHeader()
+        private void WriteHeader()
         {
             this.stream.Write(this.headerBuffer);
             this.headerWritten = true;
@@ -176,7 +176,7 @@ namespace XChaChaDotNet
         {
             if (!this.headerWritten)
             {
-                this.EncryptHeader();
+                this.WriteHeader();
             }
             else
             {
