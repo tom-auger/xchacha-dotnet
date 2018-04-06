@@ -16,6 +16,13 @@ namespace XChaChaDotNet
 
         public override int Read(byte[] buffer, int offset, int count)
         {
+            var destination = buffer.AsSpan().Slice(offset, count);
+            return this.Read(destination);
+        }
+
+        public override int Read(Span<byte> destination)
+        {
+            var count = destination.Length;
             var inputSize = count + crypto_secretstream_xchacha20poly1305_ABYTES;
             var ciphertextBuffer = ArrayPool<byte>.Shared.Rent(inputSize);
 
@@ -26,7 +33,7 @@ namespace XChaChaDotNet
                 var bytesRead = this.stream.Read(ciphertextBuffer, 0, inputSize);
                 var decryptResult = crypto_secretstream_xchacha20poly1305_pull(
                        this.state,
-                       ref MemoryMarshal.GetReference(buffer.AsSpan()),
+                       ref MemoryMarshal.GetReference(destination),
                        out var decryptedBlockLongLength,
                        out var tag,
                        in MemoryMarshal.GetReference(ciphertextBuffer.AsReadOnlySpan()),
@@ -47,26 +54,24 @@ namespace XChaChaDotNet
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            this.EncryptBlock(buffer, offset, count, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE);
+            var source = buffer.AsReadOnlySpan().Slice(offset, count);
+            this.Write(source);
+        }
+
+        public override void Write(ReadOnlySpan<byte> source)
+        {
+            this.EncryptBlock(source, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE);
         }
 
         public void WriteFinal(byte[] buffer, int offset, int count)
         {
-            this.EncryptBlock(buffer, offset, count, crypto_secretstream_xchacha20poly1305_TAG_FINAL);
+            var source = buffer.AsReadOnlySpan().Slice(offset, count);
+            this.WriteFinal(source);
         }
 
-        public void WriteFinal(ReadOnlySpan<byte> buffer)
+        public void WriteFinal(ReadOnlySpan<byte> source)
         {
-            var plaintextBuffer = ArrayPool<byte>.Shared.Rent(buffer.Length);
-            try
-            {
-                buffer.CopyTo(plaintextBuffer);
-                this.WriteFinal(plaintextBuffer, 0, buffer.Length);
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(plaintextBuffer);
-            }
+            this.EncryptBlock(source, crypto_secretstream_xchacha20poly1305_TAG_FINAL);
         }
 
         public override void Flush()
@@ -77,7 +82,7 @@ namespace XChaChaDotNet
             }
         }
 
-        private void EncryptBlock(byte[] buffer, int offset, int count, byte tag)
+        private void EncryptBlock(ReadOnlySpan<byte> source, byte tag)
         {
             if (!this.CanWrite) throw new NotSupportedException();
 
@@ -86,6 +91,7 @@ namespace XChaChaDotNet
                 this.WriteHeader();
             }
 
+            var count = source.Length;
             if (count > 0)
             {
                 var outputSize = count + crypto_secretstream_xchacha20poly1305_ABYTES;
@@ -97,7 +103,7 @@ namespace XChaChaDotNet
                            this.state,
                            ref MemoryMarshal.GetReference(ciphertextBuffer.AsSpan()),
                            out var ciphertextLength,
-                           in MemoryMarshal.GetReference(buffer.AsReadOnlySpan()),
+                           in MemoryMarshal.GetReference(source),
                            (ulong)count,
                            IntPtr.Zero,
                            0,

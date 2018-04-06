@@ -2,6 +2,7 @@ namespace XChaChaDotNet.UnitTests
 {
     using System;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using Xunit;
 
@@ -117,7 +118,7 @@ namespace XChaChaDotNet.UnitTests
                 using (var decryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Decrypt))
                 {
                     var decryptedPlainText = new byte[plainText.Length];
-                    var numberOfBytesOutput = decryptionStream.Read(decryptedPlainText, 0, decryptedPlainText.Length);
+                    var numberOfBytesOutput = decryptionStream.Read(decryptedPlainText);
 
                     Assert.Equal(plainText.Length, numberOfBytesOutput);
                     Assert.Equal(plainText, decryptedPlainText);
@@ -146,7 +147,7 @@ namespace XChaChaDotNet.UnitTests
                 {
                     var decryptedPlainText = new byte[plainText1.Length];
 
-                    decryptionStream.Read(decryptedPlainText, 0, decryptedPlainText.Length);
+                    decryptionStream.Read(decryptedPlainText);
                     Assert.False(decryptionStream.VerifyEndOfCipherStream());
                 }
             }
@@ -171,7 +172,7 @@ namespace XChaChaDotNet.UnitTests
                 {
                     var decryptedPlainText = new byte[plainText.Length];
 
-                    decryptionStream.Read(decryptedPlainText, 0, decryptedPlainText.Length);
+                    decryptionStream.Read(decryptedPlainText);
                     Assert.True(decryptionStream.VerifyEndOfCipherStream());
                 }
             }
@@ -194,11 +195,11 @@ namespace XChaChaDotNet.UnitTests
 
                 using (var decryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Decrypt))
                 {
-                    var decryptedPlainText = new byte[plainText.Length];
-                    var numberOfBytesOutput = decryptionStream.Read(decryptedPlainText, 0, decryptedPlainText.Length * 2);
+                    var decryptedPlainText = new byte[plainText.Length * 2];
+                    var numberOfBytesOutput = decryptionStream.Read(decryptedPlainText);
 
                     Assert.Equal(plainText.Length, numberOfBytesOutput);
-                    Assert.Equal(plainText, decryptedPlainText);
+                    Assert.Equal(plainText, decryptedPlainText.Take(plainText.Length));
                 }
             }
         }
