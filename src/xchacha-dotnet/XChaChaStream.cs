@@ -22,8 +22,7 @@ namespace XChaChaDotNet
 
         public override int Read(Span<byte> destination)
         {
-            var count = destination.Length;
-            var inputSize = count + crypto_secretstream_xchacha20poly1305_ABYTES;
+            var inputSize = destination.Length + crypto_secretstream_xchacha20poly1305_ABYTES;
             var ciphertextBuffer = ArrayPool<byte>.Shared.Rent(inputSize);
 
             try

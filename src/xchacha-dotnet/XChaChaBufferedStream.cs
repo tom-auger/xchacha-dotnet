@@ -24,10 +24,16 @@ namespace XChaChaDotNet
 
         public override int Read(byte[] buffer, int offset, int count)
         {
+            var destination = buffer.AsSpan().Slice(offset, count);
+            return this.Read(destination);
+        }
+
+        public override int Read(Span<byte> destination)
+        {
             if (!this.CanRead) throw new NotSupportedException();
 
             var totalBytesOutput = 0;
-            while (count > 0)
+            while (destination.Length > 0)
             {
                 // If there's any data left in the plaintextBuffer then output this first
                 if (this.plaintextBufferPosition > 0)
@@ -35,13 +41,15 @@ namespace XChaChaDotNet
                     var numBytesLeftInPlaintextBuffer =
                         PlaintextBufferLength - this.plaintextBufferPosition;
 
-                    var numberOfBufferedBytesToOutput = Math.Min(numBytesLeftInPlaintextBuffer, count);
+                    var numberOfBufferedBytesToOutput = Math.Min(numBytesLeftInPlaintextBuffer, destination.Length);
 
-                    Array.Copy(this.plaintextBuffer, this.plaintextBufferPosition, buffer, offset, numberOfBufferedBytesToOutput);
+                    this.plaintextBuffer
+                        .AsReadOnlySpan()
+                        .Slice(this.plaintextBufferPosition, numberOfBufferedBytesToOutput)
+                        .CopyTo(destination);
 
                     this.plaintextBufferPosition += numberOfBufferedBytesToOutput;
-                    offset += numberOfBufferedBytesToOutput;
-                    count -= numberOfBufferedBytesToOutput;
+                    destination = destination.Slice(numberOfBufferedBytesToOutput);
                     totalBytesOutput += numberOfBufferedBytesToOutput;
 
                     if (this.plaintextBufferPosition == PlaintextBufferLength)
@@ -75,16 +83,19 @@ namespace XChaChaDotNet
 
                 // Output the plaintext
                 var decryptedBlockLength = (int)decryptedBlockLongLength;
-                var numberOfBytesToOutput = Math.Min(count, decryptedBlockLength);
-                Array.Copy(this.plaintextBuffer, 0, buffer, offset, numberOfBytesToOutput);
+                var numberOfBytesToOutput = Math.Min(destination.Length, decryptedBlockLength);
+
+                this.plaintextBuffer
+                    .AsReadOnlySpan()
+                    .Slice(0, numberOfBytesToOutput)
+                    .CopyTo(destination);
 
                 this.plaintextBufferPosition =
                     numberOfBytesToOutput < decryptedBlockLength
                     ? numberOfBytesToOutput
                     : 0;
 
-                offset += numberOfBytesToOutput;
-                count -= numberOfBytesToOutput;
+                destination = destination.Slice(numberOfBytesToOutput);
                 totalBytesOutput += numberOfBytesToOutput;
             }
 
@@ -93,6 +104,12 @@ namespace XChaChaDotNet
 
         public override void Write(byte[] buffer, int offset, int count)
         {
+            var source = buffer.AsReadOnlySpan().Slice(offset, count);
+            this.Write(source);
+        }
+
+        public override void Write(ReadOnlySpan<byte> source)
+        {
             if (!this.CanWrite) throw new NotSupportedException();
 
             if (!this.headerWritten)
@@ -100,7 +117,7 @@ namespace XChaChaDotNet
                 this.WriteHeader();
             }
 
-            while (count > 0)
+            while (source.Length > 0)
             {
                 // Consume what's in the plaintextBbuffer first before processing new data
                 var remainingPlaintextBufferCapacity = PlaintextBufferLength - this.plaintextBufferPosition;
@@ -115,31 +132,30 @@ namespace XChaChaDotNet
                 else if (plaintextBufferIsEmpty)
                 {
                     // Buffer is empty, so process as much as possible and store the remainder in the buffer
-                    if (count > PlaintextBufferLength)
+                    if (source.Length > PlaintextBufferLength)
                     {
                         // There is more than one block left to go so process it immediately and circumvent the buffer
-                        var block = buffer.AsReadOnlySpan().Slice(offset, PlaintextBufferLength);
+                        var block = source.Slice(0, PlaintextBufferLength);
                         this.EncryptBlock(block, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE);
-                        count -= PlaintextBufferLength;
-                        offset += PlaintextBufferLength;
+
+                        source = source.Slice(PlaintextBufferLength);
                     }
                     else
                     {
                         // Store what's left in the buffer
-                        Array.Copy(buffer, offset, this.plaintextBuffer, 0, count);
-                        this.plaintextBufferPosition += count;
-                        count = 0;
-                        offset += count;
+                        source.CopyTo(this.plaintextBuffer);
+                        this.plaintextBufferPosition += source.Length;
+                        source = ReadOnlySpan<byte>.Empty;
                     }
                 }
                 else
                 {
                     // Attempt to fill the buffer first before processing
-                    var bytesToRead = Math.Min(count, remainingPlaintextBufferCapacity);
-                    Array.Copy(buffer, this.plaintextBuffer, bytesToRead);
-                    this.plaintextBufferPosition += bytesToRead;
-                    count -= bytesToRead;
-                    offset += bytesToRead;
+                    var bytesToStore = Math.Min(source.Length, remainingPlaintextBufferCapacity);
+                    source.Slice(0, bytesToStore).CopyTo(this.plaintextBuffer);
+
+                    this.plaintextBufferPosition += bytesToStore;
+                    source = source.Slice(bytesToStore);
                 }
             }
         }
