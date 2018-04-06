@@ -14,12 +14,6 @@ namespace XChaChaDotNet
         {
         }
 
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            var destination = buffer.AsSpan().Slice(offset, count);
-            return this.Read(destination);
-        }
-
         public override int Read(Span<byte> destination)
         {
             var inputSize = destination.Length + crypto_secretstream_xchacha20poly1305_ABYTES;
@@ -51,12 +45,6 @@ namespace XChaChaDotNet
             }
         }
 
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            var source = buffer.AsReadOnlySpan().Slice(offset, count);
-            this.Write(source);
-        }
-
         public override void Write(ReadOnlySpan<byte> source)
         {
             this.EncryptBlock(source, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE);
@@ -64,6 +52,7 @@ namespace XChaChaDotNet
 
         public void WriteFinal(byte[] buffer, int offset, int count)
         {
+            this.ValidateParameters(buffer, offset, count);
             var source = buffer.AsReadOnlySpan().Slice(offset, count);
             this.WriteFinal(source);
         }

@@ -66,11 +66,40 @@ namespace XChaChaDotNet
             set => throw new NotSupportedException();
         }
 
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            this.ValidateParameters(buffer, offset, count);
+            var destination = buffer.AsSpan().Slice(offset, count);
+            return this.Read(destination);
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            this.ValidateParameters(buffer, offset, count);
+            var source = buffer.AsReadOnlySpan().Slice(offset, count);
+            this.Write(source);
+        }
+
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
 
         public override void SetLength(long value) => throw new NotSupportedException();
 
         public bool VerifyEndOfCipherStream()
             => this.tagOfLastDecryptedBlock == crypto_secretstream_xchacha20poly1305_TAG_FINAL;
+
+        private protected void ValidateParameters(byte[] buffer, int offset, int count)
+        {
+            if (buffer == null)
+                throw new ArgumentNullException(nameof(buffer));
+
+            if (offset < 0)
+                throw new ArgumentOutOfRangeException(nameof(offset));
+
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count));
+
+            if (buffer.Length - offset < count)
+                throw new ArgumentException($"{nameof(buffer)} length, {nameof(offset)}, and {nameof(count)} are inconsistent");
+        }
     }
 }

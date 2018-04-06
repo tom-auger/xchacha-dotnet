@@ -22,12 +22,6 @@ namespace XChaChaDotNet
         {
         }
 
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            var destination = buffer.AsSpan().Slice(offset, count);
-            return this.Read(destination);
-        }
-
         public override int Read(Span<byte> destination)
         {
             if (!this.CanRead) throw new NotSupportedException();
@@ -100,12 +94,6 @@ namespace XChaChaDotNet
             }
 
             return totalBytesOutput;
-        }
-
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            var source = buffer.AsReadOnlySpan().Slice(offset, count);
-            this.Write(source);
         }
 
         public override void Write(ReadOnlySpan<byte> source)
