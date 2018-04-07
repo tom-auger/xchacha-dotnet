@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{5E8D0DEA-ED1C-416D-87F3-22CBE813DC58}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xchacha-dotnet", "src\xchacha-dotnet\xchacha-dotnet.csproj", "{B8738C31-E900-4A22-A337-145DB89B0CC8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xchacha-dotnet", "src\xchacha-dotnet.csproj", "{B8738C31-E900-4A22-A337-145DB89B0CC8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{59002802-F170-41EF-B4A8-0EC59A26D6AA}"
 EndProject

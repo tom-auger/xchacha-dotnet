@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\xchacha-dotnet\xchacha-dotnet.csproj" />
+    <ProjectReference Include="..\..\src\xchacha-dotnet.csproj" />
   </ItemGroup>
 
 </Project>
