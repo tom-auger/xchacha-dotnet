@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{59002802
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xchacha-dotnet.unittests", "tests\xchacha-dotnet.unittests\xchacha-dotnet.unittests.csproj", "{04448096-C43F-4C6A-BF34-35D1E935074D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xchacha-dotnet.benchmarks", "tests\xchacha-dotnet.benchmarks\xchacha-dotnet.benchmarks.csproj", "{2B535BE5-A3FC-4DBB-AFAC-2E6CFBC3F7E3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xchacha-dotnet.benchmarks", "tests\benchmarks\xchacha-dotnet.benchmarks.csproj", "{2B535BE5-A3FC-4DBB-AFAC-2E6CFBC3F7E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
