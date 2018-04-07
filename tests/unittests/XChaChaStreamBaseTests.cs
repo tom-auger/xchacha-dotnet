@@ -2,6 +2,7 @@ namespace XChaChaDotNet.UnitTests
 {
     using System;
     using System.IO;
+    using System.Security.Cryptography;
     using Xunit;
 
     public class XChaChaStreamBaseTests
@@ -90,7 +91,32 @@ namespace XChaChaDotNet.UnitTests
             using (var xchachaStream = new XChaChaBufferedStream(Stream.Null, key, EncryptionMode.Encrypt))
             {
                 Action action = () => xchachaStream.Read(Array.Empty<byte>(), 3, 1);
-                Assert.Throws<ArgumentException>(action);
+                var exception = Assert.Throws<ArgumentException>(action);
+                Assert.Equal("buffer length, offset, and count are inconsistent", exception.Message);
+            }
+        }
+
+        [Theory]
+        [InlineData(EncryptionMode.Encrypt)]
+        [InlineData(EncryptionMode.Decrypt)]
+        public void Test_Initialize_InvalidKeyLength_ThrowsArgumentException(EncryptionMode mode)
+        {
+            var key = new byte[4];
+            Action action = () => new XChaChaBufferedStream(Stream.Null, key, mode);
+            var exception = Assert.Throws<ArgumentException>(action);
+            Assert.Equal("key has invalid length\r\nParameter name: key", exception.Message);
+        }
+
+        [Fact]
+        public void Test_Initialize_Decrypt_WrongHeaderLength_ThrowsCryptographicException()
+        {
+            var invalidHeader = new byte[3];
+            var key = XChaChaKeyGenerator.GenerateKey().ToArray();
+            using (var ciphertextStream = new MemoryStream(invalidHeader))
+            {
+                Action action = () => new XChaChaBufferedStream(ciphertextStream, key, EncryptionMode.Decrypt);
+                var exception = Assert.Throws<CryptographicException>(action);
+                Assert.Equal("invalid or corrupt header", exception.Message);
             }
         }
     }
