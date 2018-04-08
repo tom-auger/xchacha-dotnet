@@ -25,7 +25,7 @@ namespace XChaChaDotNet
 
                 var bytesRead = this.stream.Read(ciphertextBuffer, 0, inputSize);
                 var decryptResult = crypto_secretstream_xchacha20poly1305_pull(
-                       this.state,
+                       this.state.Handle,
                        ref MemoryMarshal.GetReference(destination),
                        out var decryptedBlockLongLength,
                        out var tag,
@@ -88,7 +88,7 @@ namespace XChaChaDotNet
                 try
                 {
                     var encryptionResult = crypto_secretstream_xchacha20poly1305_push(
-                           this.state,
+                           this.state.Handle,
                            ref MemoryMarshal.GetReference(ciphertextBuffer.AsSpan()),
                            out var ciphertextLength,
                            in MemoryMarshal.GetReference(source),
@@ -119,7 +119,7 @@ namespace XChaChaDotNet
             if (!isClosed)
             {
                 base.Close();
-                Marshal.FreeHGlobal(this.state);
+                this.state.Dispose();
                 isClosed = true;
             }
         }

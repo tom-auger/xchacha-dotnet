@@ -30,13 +30,13 @@
         // Encryption
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int crypto_secretstream_xchacha20poly1305_init_push(
-            IntPtr state,
+            GuardedMemoryHandle state,
             byte[] header,
             byte[] k);
 
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int crypto_secretstream_xchacha20poly1305_push(
-            IntPtr state,
+            GuardedMemoryHandle state,
             ref byte c,
             out UInt64 clen_p,
             in byte m,
@@ -48,13 +48,13 @@
         // Decryption
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int crypto_secretstream_xchacha20poly1305_init_pull(
-            IntPtr state,
+            GuardedMemoryHandle state,
             byte[] header,
             byte[] key);
 
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int crypto_secretstream_xchacha20poly1305_pull(
-            IntPtr state,
+            GuardedMemoryHandle state,
             ref byte m,
             out UInt64 mlen_p,
             out byte tag_p,
@@ -62,7 +62,7 @@
             UInt64 clen,
             IntPtr ad,
             UInt64 adlen);
-            
+
         // State
         public struct crypto_secretstream_xchacha20poly1305_state
         {
@@ -80,6 +80,16 @@
 
 #pragma warning restore 0649
         }
+
+        #endregion
+
+        #region SecureMemory
+
+        [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern GuardedMemoryHandle sodium_malloc(UIntPtr size);
+
+        [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void sodium_free(IntPtr ptr);
 
         #endregion
     }

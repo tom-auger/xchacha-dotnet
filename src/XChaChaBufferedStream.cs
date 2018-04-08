@@ -60,7 +60,7 @@ namespace XChaChaDotNet
 
                 // Decrypt the next block
                 var decryptResult = crypto_secretstream_xchacha20poly1305_pull(
-                    this.state,
+                    this.state.Handle,
                     ref MemoryMarshal.GetReference(this.plaintextBuffer.AsSpan()),
                     out var decryptedBlockLongLength,
                     out var tag,
@@ -166,7 +166,7 @@ namespace XChaChaDotNet
             {
                 this.EncryptPlainTextBuffer(crypto_secretstream_xchacha20poly1305_TAG_FINAL);
                 base.Close();
-                Marshal.FreeHGlobal(this.state);
+                this.state.Dispose();
                 ArrayPool<byte>.Shared.Return(this.plaintextBuffer);
                 ArrayPool<byte>.Shared.Return(this.ciphertextBuffer);
                 isClosed = true;
@@ -201,7 +201,7 @@ namespace XChaChaDotNet
         private void EncryptBlock(ReadOnlySpan<byte> block, byte tag)
         {
             var encryptionResult = crypto_secretstream_xchacha20poly1305_push(
-                    this.state,
+                    this.state.Handle,
                     ref MemoryMarshal.GetReference(this.ciphertextBuffer.AsSpan()),
                     out var cipherTextLength,
                     in MemoryMarshal.GetReference(block),

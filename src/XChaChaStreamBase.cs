@@ -9,7 +9,7 @@ namespace XChaChaDotNet
     public abstract class XChaChaStreamBase : Stream
     {
         private protected readonly EncryptionMode encryptionMode;
-        private protected readonly IntPtr state;
+        private protected readonly SecretStreamState state;
         private protected readonly Stream stream;
         private protected readonly byte[] headerBuffer =
             new byte[crypto_secretstream_xchacha20poly1305_HEADERBYTES];
@@ -26,12 +26,15 @@ namespace XChaChaDotNet
             if (key.Length != crypto_secretstream_xchacha20poly1305_KEYBYTES)
                 throw new ArgumentException("key has invalid length", nameof(key));
 
-            this.state = Marshal.AllocHGlobal(Marshal.SizeOf<crypto_secretstream_xchacha20poly1305_state>());
+            this.state = new SecretStreamState();
 
             int initResult;
             if (encryptionMode == EncryptionMode.Encrypt)
             {
-                initResult = crypto_secretstream_xchacha20poly1305_init_push(this.state, this.headerBuffer, key.ToArray());
+                initResult = crypto_secretstream_xchacha20poly1305_init_push(
+                    this.state.Handle,
+                    this.headerBuffer,
+                    key.ToArray());
             }
             else
             {
@@ -39,7 +42,10 @@ namespace XChaChaDotNet
                 if (bytesRead != this.headerBuffer.Length)
                     throw new CryptographicException("invalid or corrupt header");
 
-                initResult = crypto_secretstream_xchacha20poly1305_init_pull(this.state, this.headerBuffer, key.ToArray());
+                initResult = crypto_secretstream_xchacha20poly1305_init_pull(
+                    this.state.Handle,
+                    this.headerBuffer,
+                    key.ToArray());
             }
 
             if (initResult != 0)
