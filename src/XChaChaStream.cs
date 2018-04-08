@@ -9,7 +9,7 @@ namespace XChaChaDotNet
 
     public class XChaChaStream : XChaChaStreamBase
     {
-        public XChaChaStream(Stream stream, ReadOnlySpan<byte> key, EncryptionMode encryptionMode)
+        public XChaChaStream(Stream stream, XChaChaKey key, EncryptionMode encryptionMode)
             : base(stream, key, encryptionMode)
         {
         }

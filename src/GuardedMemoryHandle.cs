@@ -22,11 +22,38 @@ namespace XChaChaDotNet
             GC.AddMemoryPressure((length + 16 + 0x3FFF) & ~0xFFF);
         }
 
+        public void Write(ReadOnlySpan<byte> source)
+        {
+            var addedRef = false;
+            try
+            {
+                DangerousAddRef(ref addedRef);
+                source.CopyTo(DangerousGetSpan());
+            }
+            finally
+            {
+                if (addedRef)
+                {
+                    DangerousRelease();
+                }
+            }
+        }
+
+        public void MakeReadOnly()
+        {
+            sodium_mprotect_readonly(this);
+        }
+
         protected override bool ReleaseHandle()
         {
             sodium_free(handle);
             GC.RemoveMemoryPressure((length + 16 + 0x3FFF) & ~0xFFF);
             return true;
+        }
+
+        public unsafe Span<byte> DangerousGetSpan()
+        {
+            return new Span<byte>(handle.ToPointer(), length);
         }
     }
 }

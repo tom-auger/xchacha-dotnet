@@ -18,9 +18,8 @@ namespace XChaChaDotNet.Benchmarks
         [Benchmark]
         public long RunTest()
         {
-            var key = XChaChaKeyGenerator.GenerateKey();
-
             using (var devNull = new DevNullStream())
+            using (var key = XChaChaKey.Generate())
             {
                 using (var encryptionStream = new XChaChaBufferedStream(devNull, key, EncryptionMode.Encrypt))
                 {

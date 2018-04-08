@@ -19,7 +19,7 @@ namespace XChaChaDotNet.UnitTests
             var plainText = Encoding.UTF8.GetBytes("banana");
             using (var outputStream = new MemoryStream())
             {
-                var key = XChaChaKeyGenerator.GenerateKey();
+                using (var key = XChaChaKey.Generate())
                 using (var encryptionStream = new XChaChaStream(outputStream, key, EncryptionMode.Encrypt))
                 {
                     encryptionStream.WriteFinal(plainText);
@@ -37,7 +37,7 @@ namespace XChaChaDotNet.UnitTests
         {
             using (var outputStream = new MemoryStream())
             {
-                var key = XChaChaKeyGenerator.GenerateKey();
+                using (var key = XChaChaKey.Generate())
                 using (var encryptionStream = new XChaChaStream(outputStream, key, EncryptionMode.Encrypt))
                 {
                     var plainText = Array.Empty<byte>();
@@ -54,18 +54,16 @@ namespace XChaChaDotNet.UnitTests
         public void Test_Flush_FlushesHeader()
         {
             using (var outputStream = new MemoryStream())
+            using (var key = XChaChaKey.Generate())
+            using (var encryptionStream = new XChaChaStream(outputStream, key, EncryptionMode.Encrypt))
             {
-                var key = XChaChaKeyGenerator.GenerateKey();
-                using (var encryptionStream = new XChaChaStream(outputStream, key, EncryptionMode.Encrypt))
-                {
-                    var plainText = Array.Empty<byte>();
+                var plainText = Array.Empty<byte>();
 
-                    encryptionStream.WriteFinal(plainText);
-                    encryptionStream.Flush();
+                encryptionStream.WriteFinal(plainText);
+                encryptionStream.Flush();
 
-                    var cipherText = outputStream.ToArray();
-                    Assert.Equal(HeaderLength, cipherText.Length);
-                }
+                var cipherText = outputStream.ToArray();
+                Assert.Equal(HeaderLength, cipherText.Length);
             }
         }
 
@@ -82,7 +80,7 @@ namespace XChaChaDotNet.UnitTests
 
             using (var outputStream = new MemoryStream())
             {
-                var key = XChaChaKeyGenerator.GenerateKey();
+                using (var key = XChaChaKey.Generate())
                 using (var encryptionStream = new XChaChaStream(outputStream, key, EncryptionMode.Encrypt))
                 {
                     encryptionStream.Write(plainText1);
@@ -104,8 +102,8 @@ namespace XChaChaDotNet.UnitTests
         public void Test_Decrypt_DecryptsBlock()
         {
             using (var cipherTextStream = new MemoryStream())
+            using (var key = XChaChaKey.Generate())
             {
-                var key = XChaChaKeyGenerator.GenerateKey();
                 var plainText = Encoding.UTF8.GetBytes("banana");
 
                 using (var encryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Encrypt))
@@ -130,8 +128,8 @@ namespace XChaChaDotNet.UnitTests
         public void Test_Decrypt_VerifyEndOfStream_FalseWhenPartiallyDecrypted()
         {
             using (var cipherTextStream = new MemoryStream())
+            using (var key = XChaChaKey.Generate())
             {
-                var key = XChaChaKeyGenerator.GenerateKey();
                 var plainText1 = RandomBytesGenerator.NextBytes(1024);
                 var plainText2 = RandomBytesGenerator.NextBytes(1024);
 
@@ -157,8 +155,8 @@ namespace XChaChaDotNet.UnitTests
         public void Test_Decrypt_VerifyEndOfStream_TrueWhenFullyDecrypted()
         {
             using (var cipherTextStream = new MemoryStream())
+            using (var key = XChaChaKey.Generate())
             {
-                var key = XChaChaKeyGenerator.GenerateKey();
                 var plainText = RandomBytesGenerator.NextBytes(1024 * 1024);
 
                 using (var encryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Encrypt))
@@ -182,8 +180,8 @@ namespace XChaChaDotNet.UnitTests
         public void Test_Decrypt_OverReadDecryptionStream_OutputsCorrectNumberOfBytes()
         {
             using (var cipherTextStream = new MemoryStream())
+            using (var key = XChaChaKey.Generate())
             {
-                var key = XChaChaKeyGenerator.GenerateKey();
                 var plainText = Encoding.UTF8.GetBytes("banana");
 
                 using (var encryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Encrypt))

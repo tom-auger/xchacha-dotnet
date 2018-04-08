@@ -18,14 +18,12 @@ namespace XChaChaDotNet
         private protected bool headerWritten;
         private protected byte tagOfLastDecryptedBlock;
 
-        protected XChaChaStreamBase(Stream stream, ReadOnlySpan<byte> key, EncryptionMode encryptionMode)
+        protected XChaChaStreamBase(Stream stream, XChaChaKey key, EncryptionMode encryptionMode)
         {
             this.stream = stream ?? throw new ArgumentNullException(nameof(stream));
+            if (key == null) throw new ArgumentNullException(nameof(key));
+
             this.encryptionMode = encryptionMode;
-
-            if (key.Length != crypto_secretstream_xchacha20poly1305_KEYBYTES)
-                throw new ArgumentException("key has invalid length", nameof(key));
-
             this.state = new SecretStreamState();
 
             int initResult;
@@ -34,7 +32,7 @@ namespace XChaChaDotNet
                 initResult = crypto_secretstream_xchacha20poly1305_init_push(
                     this.state.Handle,
                     this.headerBuffer,
-                    key.ToArray());
+                    key.Handle);
             }
             else
             {
@@ -45,7 +43,7 @@ namespace XChaChaDotNet
                 initResult = crypto_secretstream_xchacha20poly1305_init_pull(
                     this.state.Handle,
                     this.headerBuffer,
-                    key.ToArray());
+                    key.Handle);
             }
 
             if (initResult != 0)

@@ -17,7 +17,7 @@ namespace XChaChaDotNet
         private byte[] plaintextBuffer = ArrayPool<byte>.Shared.Rent(PlaintextBufferLength);
         private byte[] ciphertextBuffer = ArrayPool<byte>.Shared.Rent(CiphertextBufferLength);
 
-        public XChaChaBufferedStream(Stream stream, ReadOnlySpan<byte> key, EncryptionMode encryptionMode)
+        public XChaChaBufferedStream(Stream stream, XChaChaKey key, EncryptionMode encryptionMode)
             : base(stream, key, encryptionMode)
         {
         }
