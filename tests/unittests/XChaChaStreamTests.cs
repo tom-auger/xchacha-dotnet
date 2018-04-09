@@ -106,7 +106,7 @@ namespace XChaChaDotNet.UnitTests
             {
                 var plainText = Encoding.UTF8.GetBytes("banana");
 
-                using (var encryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Encrypt))
+                using (var encryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
                     encryptionStream.WriteFinal(plainText);
                 }
@@ -133,7 +133,7 @@ namespace XChaChaDotNet.UnitTests
                 var plainText1 = RandomBytesGenerator.NextBytes(1024);
                 var plainText2 = RandomBytesGenerator.NextBytes(1024);
 
-                using (var encryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Encrypt))
+                using (var encryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
                     encryptionStream.Write(plainText1);
                     encryptionStream.WriteFinal(plainText2);
@@ -159,7 +159,7 @@ namespace XChaChaDotNet.UnitTests
             {
                 var plainText = RandomBytesGenerator.NextBytes(1024 * 1024);
 
-                using (var encryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Encrypt))
+                using (var encryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
                     encryptionStream.WriteFinal(plainText);
                 }
@@ -184,7 +184,7 @@ namespace XChaChaDotNet.UnitTests
             {
                 var plainText = Encoding.UTF8.GetBytes("banana");
 
-                using (var encryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Encrypt))
+                using (var encryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
                     encryptionStream.WriteFinal(plainText);
                 }

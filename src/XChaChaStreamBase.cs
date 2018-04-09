@@ -10,20 +10,22 @@ namespace XChaChaDotNet
     {
         private protected readonly EncryptionMode encryptionMode;
         private protected readonly SecretStreamState state;
+        private readonly bool leaveOpen;
         private protected readonly Stream stream;
         private protected readonly byte[] headerBuffer =
             new byte[crypto_secretstream_xchacha20poly1305_HEADERBYTES];
 
-        private protected bool isClosed;
         private protected bool headerWritten;
         private protected byte tagOfLastDecryptedBlock;
 
-        protected XChaChaStreamBase(Stream stream, XChaChaKey key, EncryptionMode encryptionMode)
+
+        protected XChaChaStreamBase(Stream stream, XChaChaKey key, EncryptionMode encryptionMode, bool leaveOpen)
         {
             this.stream = stream ?? throw new ArgumentNullException(nameof(stream));
             if (key == null) throw new ArgumentNullException(nameof(key));
 
             this.encryptionMode = encryptionMode;
+            this.leaveOpen = leaveOpen;
             this.state = new SecretStreamState();
 
             int initResult;
@@ -52,12 +54,12 @@ namespace XChaChaDotNet
 
         public override bool CanRead =>
             this.encryptionMode == EncryptionMode.Decrypt &&
-            !this.isClosed &&
+            this.stream != null &&
             this.stream.CanRead;
 
         public override bool CanWrite =>
             this.encryptionMode == EncryptionMode.Encrypt &&
-            !this.isClosed &&
+            this.stream != null &&
             this.stream.CanWrite;
 
         public override bool CanSeek => false;
@@ -105,5 +107,25 @@ namespace XChaChaDotNet
             if (buffer.Length - offset < count)
                 throw new ArgumentException($"{nameof(buffer)} length, {nameof(offset)}, and {nameof(count)} are inconsistent");
         }
+
+        #region IDisposable
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    this.state?.Dispose();
+
+                    if (!this.leaveOpen)
+                        this.stream?.Dispose();
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
+        }
+        #endregion
     }
 }

@@ -132,7 +132,7 @@ namespace XChaChaDotNet.UnitTests
             {
                 var plainText = Encoding.UTF8.GetBytes("banana");
 
-                using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt))
+                using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
                     encryptionStream.Write(plainText);
                 }
@@ -158,7 +158,7 @@ namespace XChaChaDotNet.UnitTests
             {
                 var plainText = RandomBytesGenerator.NextBytes(1024 * 1024);
 
-                using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt))
+                using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
                     encryptionStream.Write(plainText);
                 }
@@ -183,7 +183,7 @@ namespace XChaChaDotNet.UnitTests
             {
                 var plainText = RandomBytesGenerator.NextBytes(1024 * 1024);
 
-                using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt))
+                using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
                     encryptionStream.Write(plainText);
                 }
@@ -208,7 +208,7 @@ namespace XChaChaDotNet.UnitTests
             {
                 var plainText = Encoding.UTF8.GetBytes("banana");
 
-                using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt))
+                using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
                     encryptionStream.Write(plainText);
                 }
@@ -234,7 +234,7 @@ namespace XChaChaDotNet.UnitTests
             {
                 var plainText = RandomBytesGenerator.NextBytes(1024 * 1024);
 
-                using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt))
+                using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
                     encryptionStream.Write(plainText);
                 }

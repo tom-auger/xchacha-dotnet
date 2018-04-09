@@ -9,8 +9,8 @@ namespace XChaChaDotNet
 
     public class XChaChaStream : XChaChaStreamBase
     {
-        public XChaChaStream(Stream stream, XChaChaKey key, EncryptionMode encryptionMode)
-            : base(stream, key, encryptionMode)
+        public XChaChaStream(Stream stream, XChaChaKey key, EncryptionMode encryptionMode, bool leaveOpen = false)
+            : base(stream, key, encryptionMode, leaveOpen)
         {
         }
 
@@ -112,16 +112,6 @@ namespace XChaChaDotNet
         {
             this.stream.Write(this.headerBuffer);
             this.headerWritten = true;
-        }
-
-        public override void Close()
-        {
-            if (!isClosed)
-            {
-                base.Close();
-                this.state.Dispose();
-                isClosed = true;
-            }
         }
     }
 }

@@ -17,8 +17,8 @@ namespace XChaChaDotNet
         private byte[] plaintextBuffer = ArrayPool<byte>.Shared.Rent(PlaintextBufferLength);
         private byte[] ciphertextBuffer = ArrayPool<byte>.Shared.Rent(CiphertextBufferLength);
 
-        public XChaChaBufferedStream(Stream stream, XChaChaKey key, EncryptionMode encryptionMode)
-            : base(stream, key, encryptionMode)
+        public XChaChaBufferedStream(Stream stream, XChaChaKey key, EncryptionMode encryptionMode, bool leaveOpen = false)
+            : base(stream, key, encryptionMode, leaveOpen)
         {
         }
 
@@ -160,19 +160,6 @@ namespace XChaChaDotNet
                 this.EncryptPlainTextBuffer(crypto_secretstream_xchacha20poly1305_TAG_FINAL);
         }
 
-        public override void Close()
-        {
-            if (!isClosed)
-            {
-                this.EncryptPlainTextBuffer(crypto_secretstream_xchacha20poly1305_TAG_FINAL);
-                base.Close();
-                this.state.Dispose();
-                ArrayPool<byte>.Shared.Return(this.plaintextBuffer);
-                ArrayPool<byte>.Shared.Return(this.ciphertextBuffer);
-                isClosed = true;
-            }
-        }
-
         private void WriteHeader()
         {
             this.stream.Write(this.headerBuffer);
@@ -215,5 +202,33 @@ namespace XChaChaDotNet
             this.stream.Write(this.ciphertextBuffer, 0, (int)cipherTextLength);
             this.plaintextBufferPosition = 0;
         }
+
+        #region IDisposable
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing && this.stream != null)
+                {
+                    this.EncryptPlainTextBuffer(crypto_secretstream_xchacha20poly1305_TAG_FINAL);
+                }
+            }
+            finally
+            {
+                try
+                {
+                    if (disposing)
+                    {
+                        ArrayPool<byte>.Shared.Return(this.plaintextBuffer);
+                        ArrayPool<byte>.Shared.Return(this.ciphertextBuffer);
+                    }
+                }
+                finally
+                {
+                    base.Dispose(disposing);
+                }
+            }
+        }
+        #endregion
     }
 }
