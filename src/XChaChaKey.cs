@@ -9,6 +9,7 @@ namespace XChaChaDotNet
         private readonly GuardedMemoryHandle handle;
 
         public XChaChaKey(ReadOnlySpan<byte> key)
+            : this()
         {
             if (key.Length != crypto_secretstream_xchacha20poly1305_KEYBYTES)
                 throw new ArgumentException("key has invalid length", nameof(key));
@@ -19,8 +20,14 @@ namespace XChaChaDotNet
         }
 
         private XChaChaKey(GuardedMemoryHandle handle)
+            : this()
         {
             this.handle = handle;
+        }
+
+        private XChaChaKey()
+        {
+            Sodium.Initialize();
         }
 
         public static XChaChaKey Generate()
@@ -30,7 +37,7 @@ namespace XChaChaDotNet
             var keySpan = handle.DangerousGetSpan();
             crypto_secretstream_xchacha20poly1305_keygen(ref MemoryMarshal.GetReference(keySpan));
             handle.MakeReadOnly();
-            
+
             return new XChaChaKey(handle);
         }
 

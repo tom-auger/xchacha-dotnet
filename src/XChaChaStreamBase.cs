@@ -21,6 +21,8 @@ namespace XChaChaDotNet
 
         protected XChaChaStreamBase(Stream stream, XChaChaKey key, EncryptionMode encryptionMode, bool leaveOpen)
         {
+            Sodium.Initialize();
+
             this.stream = stream ?? throw new ArgumentNullException(nameof(stream));
             if (key == null) throw new ArgumentNullException(nameof(key));
 
