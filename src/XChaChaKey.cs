@@ -8,8 +8,6 @@ namespace XChaChaDotNet
     {
         private readonly GuardedMemoryHandle handle;
 
-        private bool disposed = false;
-
         public XChaChaKey(ReadOnlySpan<byte> key)
         {
             if (key.Length != crypto_secretstream_xchacha20poly1305_KEYBYTES)
@@ -31,29 +29,26 @@ namespace XChaChaDotNet
             GuardedMemoryHandle.Alloc(crypto_secretstream_xchacha20poly1305_KEYBYTES, out handle);
             var keySpan = handle.DangerousGetSpan();
             crypto_secretstream_xchacha20poly1305_keygen(ref MemoryMarshal.GetReference(keySpan));
-
+            handle.MakeReadOnly();
+            
             return new XChaChaKey(handle);
         }
 
         internal GuardedMemoryHandle Handle => this.handle;
 
         #region IDisposable
-        void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (disposing)
             {
-                if (disposing)
-                {
-                    this.handle.Dispose();
-                }
-
-                disposed = true;
+                this.handle?.Dispose();
             }
         }
 
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

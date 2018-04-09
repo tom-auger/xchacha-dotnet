@@ -4,12 +4,11 @@ namespace XChaChaDotNet
     using System.Runtime.InteropServices;
     using static SodiumInterop;
 
-    internal class SecretStreamState : IDisposable
+    internal sealed class SecretStreamState : IDisposable
     {
         private static readonly int Length = Marshal.SizeOf<crypto_secretstream_xchacha20poly1305_state>();
 
-        private bool disposed = false;
-        private GuardedMemoryHandle handle;
+        private readonly GuardedMemoryHandle handle;
 
         internal SecretStreamState()
         {
@@ -19,16 +18,11 @@ namespace XChaChaDotNet
         public GuardedMemoryHandle Handle => this.handle;
 
         #region IDisposable
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (disposing)
             {
-                if (disposing)
-                {
-                    this.handle.Dispose();
-                }
-
-                disposed = true;
+                this.handle?.Dispose();
             }
         }
 
