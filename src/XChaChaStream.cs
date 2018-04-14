@@ -29,7 +29,7 @@ namespace XChaChaDotNet
                        ref MemoryMarshal.GetReference(destination),
                        out var decryptedBlockLongLength,
                        out var tag,
-                       in MemoryMarshal.GetReference(ciphertextBuffer.AsReadOnlySpan()),
+                       in MemoryMarshal.GetReference(ciphertextBuffer.AsSpan()),
                        (UInt64)bytesRead,
                        IntPtr.Zero,
                        0);
@@ -53,7 +53,7 @@ namespace XChaChaDotNet
         public void WriteFinal(byte[] buffer, int offset, int count)
         {
             this.ValidateParameters(buffer, offset, count);
-            var source = buffer.AsReadOnlySpan().Slice(offset, count);
+            var source = buffer.AsSpan(offset, count);
             this.WriteFinal(source);
         }
 

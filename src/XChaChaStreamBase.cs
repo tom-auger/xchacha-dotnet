@@ -84,7 +84,7 @@ namespace XChaChaDotNet
         public override void Write(byte[] buffer, int offset, int count)
         {
             this.ValidateParameters(buffer, offset, count);
-            var source = buffer.AsReadOnlySpan().Slice(offset, count);
+            var source = buffer.AsSpan(offset, count);
             this.Write(source);
         }
 

@@ -38,8 +38,7 @@ namespace XChaChaDotNet
                     var numberOfBufferedBytesToOutput = Math.Min(numBytesLeftInPlaintextBuffer, destination.Length);
 
                     this.plaintextBuffer
-                        .AsReadOnlySpan()
-                        .Slice(this.plaintextBufferPosition, numberOfBufferedBytesToOutput)
+                        .AsSpan(this.plaintextBufferPosition, numberOfBufferedBytesToOutput)
                         .CopyTo(destination);
 
                     this.plaintextBufferPosition += numberOfBufferedBytesToOutput;
@@ -64,7 +63,7 @@ namespace XChaChaDotNet
                     ref MemoryMarshal.GetReference(this.plaintextBuffer.AsSpan()),
                     out var decryptedBlockLongLength,
                     out var tag,
-                    in MemoryMarshal.GetReference(this.ciphertextBuffer.AsReadOnlySpan()),
+                    in MemoryMarshal.GetReference(this.ciphertextBuffer.AsSpan()),
                     (UInt64)bytesRead,
                     IntPtr.Zero,
                     0);
@@ -80,8 +79,7 @@ namespace XChaChaDotNet
                 var numberOfBytesToOutput = Math.Min(destination.Length, decryptedBlockLength);
 
                 this.plaintextBuffer
-                    .AsReadOnlySpan()
-                    .Slice(0, numberOfBytesToOutput)
+                    .AsSpan(0, numberOfBytesToOutput)
                     .CopyTo(destination);
 
                 this.plaintextBufferPosition =
@@ -177,8 +175,7 @@ namespace XChaChaDotNet
                 if (this.plaintextBufferPosition != 0)
                 {
                     var block = this.plaintextBuffer
-                        .AsReadOnlySpan()
-                        .Slice(0, this.plaintextBufferPosition);
+                        .AsSpan(0, this.plaintextBufferPosition);
 
                     this.EncryptBlock(block, tag);
                 }
