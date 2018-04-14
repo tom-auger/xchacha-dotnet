@@ -1,7 +1,6 @@
 namespace XChaChaDotNet
 {
     using System;
-    using System.Buffers;
     using System.IO;
     using System.Runtime.InteropServices;
     using System.Security.Cryptography;
@@ -17,19 +16,17 @@ namespace XChaChaDotNet
         public override int Read(Span<byte> destination)
         {
             var inputSize = destination.Length + crypto_secretstream_xchacha20poly1305_ABYTES;
-            var ciphertextBuffer = ArrayPool<byte>.Shared.Rent(inputSize);
-
-            try
+            using (var ciphertextBuffer = new RentedArray(inputSize))
             {
                 if (!this.CanRead) throw new NotSupportedException();
 
-                var bytesRead = this.stream.Read(ciphertextBuffer, 0, inputSize);
+                var bytesRead = this.stream.Read(ciphertextBuffer.AsSpan());
                 var decryptResult = crypto_secretstream_xchacha20poly1305_pull(
                        this.state.Handle,
                        ref MemoryMarshal.GetReference(destination),
                        out var decryptedBlockLongLength,
                        out var tag,
-                       in MemoryMarshal.GetReference(ciphertextBuffer.AsSpan()),
+                       in MemoryMarshal.GetReference(ciphertextBuffer.AsReadOnlySpan()),
                        (UInt64)bytesRead,
                        IntPtr.Zero,
                        0);
@@ -38,10 +35,6 @@ namespace XChaChaDotNet
                 this.tagOfLastDecryptedBlock = tag;
 
                 return (int)decryptedBlockLongLength;
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(ciphertextBuffer);
             }
         }
 
@@ -83,9 +76,7 @@ namespace XChaChaDotNet
             if (count > 0)
             {
                 var outputSize = count + crypto_secretstream_xchacha20poly1305_ABYTES;
-                var ciphertextBuffer = ArrayPool<byte>.Shared.Rent(outputSize);
-
-                try
+                using (var ciphertextBuffer = new RentedArray(outputSize))
                 {
                     var encryptionResult = crypto_secretstream_xchacha20poly1305_push(
                            this.state.Handle,
@@ -99,11 +90,7 @@ namespace XChaChaDotNet
 
                     if (encryptionResult != 0) throw new CryptographicException("encryption of block failed");
 
-                    this.stream.Write(ciphertextBuffer, 0, (int)ciphertextLength);
-                }
-                finally
-                {
-                    ArrayPool<byte>.Shared.Return(ciphertextBuffer);
+                    this.stream.Write(ciphertextBuffer.AsReadOnlySpan(0, (int)ciphertextLength));
                 }
             }
         }

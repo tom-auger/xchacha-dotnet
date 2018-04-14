@@ -1,7 +1,6 @@
 namespace XChaChaDotNet
 {
     using System;
-    using System.Buffers;
     using System.IO;
     using System.Runtime.InteropServices;
     using System.Security.Cryptography;
@@ -14,8 +13,8 @@ namespace XChaChaDotNet
             PlaintextBufferLength + crypto_secretstream_xchacha20poly1305_ABYTES;
 
         private int plaintextBufferPosition;
-        private byte[] plaintextBuffer = ArrayPool<byte>.Shared.Rent(PlaintextBufferLength);
-        private byte[] ciphertextBuffer = ArrayPool<byte>.Shared.Rent(CiphertextBufferLength);
+        private readonly RentedArray plaintextBuffer = new RentedArray(PlaintextBufferLength);
+        private readonly RentedArray ciphertextBuffer = new RentedArray(CiphertextBufferLength);
 
         public XChaChaBufferedStream(Stream stream, XChaChaKey key, EncryptionMode encryptionMode, bool leaveOpen = false)
             : base(stream, key, encryptionMode, leaveOpen)
@@ -38,7 +37,7 @@ namespace XChaChaDotNet
                     var numberOfBufferedBytesToOutput = Math.Min(numBytesLeftInPlaintextBuffer, destination.Length);
 
                     this.plaintextBuffer
-                        .AsSpan(this.plaintextBufferPosition, numberOfBufferedBytesToOutput)
+                        .AsReadOnlySpan(this.plaintextBufferPosition, numberOfBufferedBytesToOutput)
                         .CopyTo(destination);
 
                     this.plaintextBufferPosition += numberOfBufferedBytesToOutput;
@@ -52,7 +51,7 @@ namespace XChaChaDotNet
                 }
 
                 // Read the next block from the stream
-                var bytesRead = this.stream.Read(this.ciphertextBuffer, 0, CiphertextBufferLength);
+                var bytesRead = this.stream.Read(this.ciphertextBuffer.AsSpan());
 
                 // Stop if we've already reached the end of the stream
                 if (bytesRead == 0) break;
@@ -63,7 +62,7 @@ namespace XChaChaDotNet
                     ref MemoryMarshal.GetReference(this.plaintextBuffer.AsSpan()),
                     out var decryptedBlockLongLength,
                     out var tag,
-                    in MemoryMarshal.GetReference(this.ciphertextBuffer.AsSpan()),
+                    in MemoryMarshal.GetReference(this.ciphertextBuffer.AsReadOnlySpan()),
                     (UInt64)bytesRead,
                     IntPtr.Zero,
                     0);
@@ -79,7 +78,7 @@ namespace XChaChaDotNet
                 var numberOfBytesToOutput = Math.Min(destination.Length, decryptedBlockLength);
 
                 this.plaintextBuffer
-                    .AsSpan(0, numberOfBytesToOutput)
+                    .AsReadOnlySpan(0, numberOfBytesToOutput)
                     .CopyTo(destination);
 
                 this.plaintextBufferPosition =
@@ -129,7 +128,7 @@ namespace XChaChaDotNet
                     else
                     {
                         // Store what's left in the buffer
-                        source.CopyTo(this.plaintextBuffer);
+                        source.CopyTo(this.plaintextBuffer.AsSpan());
                         this.plaintextBufferPosition += source.Length;
                         source = ReadOnlySpan<byte>.Empty;
                     }
@@ -138,7 +137,7 @@ namespace XChaChaDotNet
                 {
                     // Attempt to fill the buffer first before processing
                     var bytesToStore = Math.Min(source.Length, remainingPlaintextBufferCapacity);
-                    source.Slice(0, bytesToStore).CopyTo(this.plaintextBuffer);
+                    source.Slice(0, bytesToStore).CopyTo(this.plaintextBuffer.AsSpan());
 
                     this.plaintextBufferPosition += bytesToStore;
                     source = source.Slice(bytesToStore);
@@ -175,7 +174,7 @@ namespace XChaChaDotNet
                 if (this.plaintextBufferPosition != 0)
                 {
                     var block = this.plaintextBuffer
-                        .AsSpan(0, this.plaintextBufferPosition);
+                        .AsReadOnlySpan(0, this.plaintextBufferPosition);
 
                     this.EncryptBlock(block, tag);
                 }
@@ -196,7 +195,7 @@ namespace XChaChaDotNet
 
             if (encryptionResult != 0) throw new CryptographicException("encryption of block failed");
 
-            this.stream.Write(this.ciphertextBuffer, 0, (int)cipherTextLength);
+            this.stream.Write(this.ciphertextBuffer.AsReadOnlySpan(0, (int)cipherTextLength));
             this.plaintextBufferPosition = 0;
         }
 
@@ -216,8 +215,8 @@ namespace XChaChaDotNet
                 {
                     if (disposing)
                     {
-                        ArrayPool<byte>.Shared.Return(this.plaintextBuffer);
-                        ArrayPool<byte>.Shared.Return(this.ciphertextBuffer);
+                        this.plaintextBuffer?.Dispose();
+                        this.ciphertextBuffer?.Dispose();
                     }
                 }
                 finally
