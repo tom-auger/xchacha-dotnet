@@ -5,12 +5,10 @@ namespace XChaChaDotNet.UnitTests
     using System.Linq;
     using System.Text;
     using Xunit;
+    using static XChaChaConstants;
 
     public class XChaChaStreamTests
     {
-        private const int HeaderLength = 24;
-        private const int ABytes = 17;
-
         #region Encryption
         [Fact]
         public void Test_Encrypt_ProducesCorrectOutputLength()

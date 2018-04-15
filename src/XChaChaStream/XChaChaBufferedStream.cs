@@ -225,7 +225,8 @@ namespace XChaChaDotNet
                 {
                     if (disposing && this.stream != null)
                     {
-                        this.EncryptPlainTextBuffer(crypto_secretstream_xchacha20poly1305_TAG_FINAL);
+                        if (this.encryptionMode == EncryptionMode.Encrypt)
+                            this.EncryptPlainTextBuffer(crypto_secretstream_xchacha20poly1305_TAG_FINAL);
                     }
                 }
                 finally

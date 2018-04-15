@@ -6,19 +6,16 @@ namespace XChaChaDotNet.UnitTests
     using System.Linq;
     using System.Text;
     using Xunit;
+    using static XChaChaConstants;
 
     public class XChaChaBufferedStreamTests
     {
-        private const int HeaderLength = 24;
-        private const int ABytes = 17;
-
-        public static readonly TheoryData<int> TestBufferLengths =
-            new TheoryData<int>
-            {
-                128 * 1024,
-                192 * 1024,
-                256 * 1024
-            };
+        public static readonly TheoryData<int> TestBufferLengths = new TheoryData<int>
+        {
+            128 * 1024,
+            192 * 1024,
+            256 * 1024
+        };
 
         #region Encryption
         [Fact]

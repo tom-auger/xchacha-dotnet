@@ -4,6 +4,7 @@ namespace XChaChaDotNet.UnitTests
     using System.IO;
     using System.Security.Cryptography;
     using Xunit;
+    using static XChaChaConstants;
 
     public class XChaChaStreamBaseTests
     {
@@ -144,6 +145,29 @@ namespace XChaChaDotNet.UnitTests
                 var innerException = exception.InnerException;
                 Assert.IsType<CryptographicException>(innerException);
                 Assert.Equal("invalid or corrupt header", innerException.Message);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(StreamTypes))]
+        public void Test_CanRead_Encrypt_False(Type streamType)
+        {
+            using (var key = XChaChaKey.Generate())
+            using (var xchachaStream = (XChaChaStreamBase)Activator.CreateInstance(streamType, Stream.Null, key, EncryptionMode.Encrypt, false))
+            {
+                Assert.False(xchachaStream.CanRead);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(StreamTypes))]
+        public void Test_CanWrite_Decrypt_False(Type streamType)
+        {
+            using (var key = XChaChaKey.Generate())
+            using (var plaintextStream = new MemoryStream(new byte[HeaderLength]))
+            using (var xchachaStream = (XChaChaStreamBase)Activator.CreateInstance(streamType, plaintextStream, key, EncryptionMode.Decrypt, false))
+            {
+                Assert.False(xchachaStream.CanWrite);
             }
         }
     }
