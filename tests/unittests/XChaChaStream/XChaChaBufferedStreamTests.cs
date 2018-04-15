@@ -12,12 +12,12 @@ namespace XChaChaDotNet.UnitTests
         private const int HeaderLength = 24;
         private const int ABytes = 17;
 
-        public static readonly List<object[]> TestBufferLengths =
-            new List<object[]>()
+        public static readonly TheoryData<int> TestBufferLengths =
+            new TheoryData<int>
             {
-                new object[] { 128 * 1024 },
-                new object[] { 192 * 1024 },
-                new object[] { 256 * 1024 }
+                128 * 1024,
+                192 * 1024,
+                256 * 1024
             };
 
         #region Encryption
