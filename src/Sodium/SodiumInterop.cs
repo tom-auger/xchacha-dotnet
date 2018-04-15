@@ -11,7 +11,6 @@
         public static extern int sodium_init();
 
         #region XChaCha20Poly1305SecretStream
-
         public const int crypto_secretstream_xchacha20poly1305_KEYBYTES = 32;
         public const int crypto_secretstream_xchacha20poly1305_HEADERBYTES = 24;
         public const int crypto_secretstream_xchacha20poly1305_ABYTES = 17;
@@ -80,11 +79,9 @@
 
 #pragma warning restore 0649
         }
-
         #endregion
 
         #region SecureMemory
-
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern GuardedMemoryHandle sodium_malloc(UIntPtr size);
 
@@ -93,7 +90,6 @@
 
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void sodium_free(IntPtr ptr);
-
         #endregion
     }
 }

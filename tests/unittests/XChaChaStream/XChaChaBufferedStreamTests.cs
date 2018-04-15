@@ -12,7 +12,6 @@ namespace XChaChaDotNet.UnitTests
         private const int ABytes = 17;
 
         #region Encryption
-
         [Fact]
         public void Test_Encrypt_ProducesCorrectOutputLength()
         {
@@ -119,11 +118,9 @@ namespace XChaChaDotNet.UnitTests
                 Assert.Equal(expectedOutputLength, cipherText.Length);
             }
         }
-
         #endregion
 
         #region Decryption
-
         [Fact]
         public void Test_Decrypt_DecryptsSmallBlock()
         {
@@ -251,7 +248,6 @@ namespace XChaChaDotNet.UnitTests
                 }
             }
         }
-
         #endregion
     }
 }
