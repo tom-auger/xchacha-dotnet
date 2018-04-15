@@ -95,6 +95,11 @@ namespace XChaChaDotNet
         public bool VerifyEndOfCipherStream()
             => this.tagOfLastDecryptedBlock == crypto_secretstream_xchacha20poly1305_TAG_FINAL;
 
+        private protected static int CalculateCiphertextLength(int plaintextLength)
+        {
+            return plaintextLength + crypto_secretstream_xchacha20poly1305_ABYTES;
+        }
+
         private protected void ValidateParameters(byte[] buffer, int offset, int count)
         {
             if (buffer == null)

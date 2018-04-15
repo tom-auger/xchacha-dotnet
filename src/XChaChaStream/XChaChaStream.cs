@@ -15,7 +15,7 @@ namespace XChaChaDotNet
 
         public override int Read(Span<byte> destination)
         {
-            var inputSize = destination.Length + crypto_secretstream_xchacha20poly1305_ABYTES;
+            var inputSize = CalculateCiphertextLength(destination.Length);
             using (var ciphertextBuffer = new RentedArray(inputSize))
             {
                 if (!this.CanRead) throw new NotSupportedException();
@@ -75,7 +75,7 @@ namespace XChaChaDotNet
             var count = source.Length;
             if (count > 0)
             {
-                var outputSize = count + crypto_secretstream_xchacha20poly1305_ABYTES;
+                var outputSize = CalculateCiphertextLength(count);
                 using (var ciphertextBuffer = new RentedArray(outputSize))
                 {
                     var encryptionResult = crypto_secretstream_xchacha20poly1305_push(

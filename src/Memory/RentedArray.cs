@@ -6,19 +6,20 @@ namespace XChaChaDotNet
     internal class RentedArray : IDisposable
     {
         private readonly byte[] rentedArray;
-        private readonly int length;
 
         private bool disposed;
 
         public RentedArray(int length)
         {
-            this.length = length;
+            this.Length = length;
             this.rentedArray = ArrayPool<byte>.Shared.Rent(length);
         }
 
-        public Span<byte> AsSpan() => this.rentedArray.AsSpan(0, this.length);
+        public int Length { get; }
+
+        public Span<byte> AsSpan() => this.rentedArray.AsSpan(0, this.Length);
         public Span<byte> AsSpan(int offset, int length) => this.rentedArray.AsSpan(offset, length);
-        public ReadOnlySpan<byte> AsReadOnlySpan() => this.rentedArray.AsSpan(0, this.length);
+        public ReadOnlySpan<byte> AsReadOnlySpan() => this.rentedArray.AsSpan(0, this.Length);
         public ReadOnlySpan<byte> AsReadOnlySpan(int offset, int length) => this.rentedArray.AsSpan(offset, length);
 
         #region IDisposable
