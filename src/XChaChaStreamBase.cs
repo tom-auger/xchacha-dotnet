@@ -9,7 +9,7 @@ namespace XChaChaDotNet
     public abstract class XChaChaStreamBase : Stream
     {
         private protected readonly EncryptionMode encryptionMode;
-        private protected readonly SecretStreamState state;
+        private protected readonly XChaChaStreamState state;
         private readonly bool leaveOpen;
         private protected readonly Stream stream;
         private protected readonly byte[] headerBuffer =
@@ -28,7 +28,7 @@ namespace XChaChaDotNet
 
             this.encryptionMode = encryptionMode;
             this.leaveOpen = leaveOpen;
-            this.state = new SecretStreamState();
+            this.state = new XChaChaStreamState();
 
             int initResult;
             if (encryptionMode == EncryptionMode.Encrypt)

@@ -4,13 +4,13 @@ namespace XChaChaDotNet
     using System.Runtime.InteropServices;
     using static SodiumInterop;
 
-    internal sealed class SecretStreamState : IDisposable
+    internal sealed class XChaChaStreamState : IDisposable
     {
         private static readonly int Length = Marshal.SizeOf<crypto_secretstream_xchacha20poly1305_state>();
 
         private readonly GuardedMemoryHandle handle;
 
-        internal SecretStreamState()
+        internal XChaChaStreamState()
         {
             GuardedMemoryHandle.Alloc(Length, out this.handle);
         }
