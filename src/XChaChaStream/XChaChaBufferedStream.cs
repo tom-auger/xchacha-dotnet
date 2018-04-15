@@ -202,26 +202,29 @@ namespace XChaChaDotNet
         #region IDisposable
         protected override void Dispose(bool disposing)
         {
-            try
-            {
-                if (disposing && this.stream != null)
-                {
-                    this.EncryptPlainTextBuffer(crypto_secretstream_xchacha20poly1305_TAG_FINAL);
-                }
-            }
-            finally
+            if (!this.disposed)
             {
                 try
                 {
-                    if (disposing)
+                    if (disposing && this.stream != null)
                     {
-                        this.plaintextBuffer?.Dispose();
-                        this.ciphertextBuffer?.Dispose();
+                        this.EncryptPlainTextBuffer(crypto_secretstream_xchacha20poly1305_TAG_FINAL);
                     }
                 }
                 finally
                 {
-                    base.Dispose(disposing);
+                    try
+                    {
+                        if (disposing)
+                        {
+                            this.plaintextBuffer?.Dispose();
+                            this.ciphertextBuffer?.Dispose();
+                        }
+                    }
+                    finally
+                    {
+                        base.Dispose(disposing);
+                    }
                 }
             }
         }

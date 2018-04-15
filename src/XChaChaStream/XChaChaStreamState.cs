@@ -9,6 +9,8 @@ namespace XChaChaDotNet
         private static readonly int Length = Marshal.SizeOf<crypto_secretstream_xchacha20poly1305_state>();
 
         private readonly GuardedMemoryHandle handle;
+        
+        private bool disposed;
 
         internal XChaChaStreamState()
         {
@@ -20,9 +22,14 @@ namespace XChaChaDotNet
         #region IDisposable
         private void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!this.disposed)
             {
-                this.handle?.Dispose();
+                if (disposing)
+                {
+                    this.handle?.Dispose();
+                }
+
+                this.disposed = true;
             }
         }
 

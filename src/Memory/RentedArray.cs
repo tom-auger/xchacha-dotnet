@@ -8,7 +8,7 @@ namespace XChaChaDotNet
         private readonly byte[] rentedArray;
         private readonly int length;
 
-        private bool disposed = false;
+        private bool disposed;
 
         public RentedArray(int length)
         {

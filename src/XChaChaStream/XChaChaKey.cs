@@ -7,6 +7,8 @@ namespace XChaChaDotNet
     public sealed class XChaChaKey : IDisposable
     {
         private readonly GuardedMemoryHandle handle;
+        
+        private bool disposed;
 
         public XChaChaKey(ReadOnlySpan<byte> key)
         {
@@ -41,16 +43,20 @@ namespace XChaChaDotNet
         #region IDisposable
         private void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!this.disposed)
             {
-                this.handle?.Dispose();
+                if (disposing)
+                {
+                    this.handle?.Dispose();
+                }
+
+                this.disposed = true;
             }
         }
 
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
         #endregion
     }

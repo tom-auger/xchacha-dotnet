@@ -17,7 +17,7 @@ namespace XChaChaDotNet
 
         private protected bool headerWritten;
         private protected byte tagOfLastDecryptedBlock;
-
+        private protected bool disposed;
 
         protected XChaChaStreamBase(Stream stream, XChaChaKey key, EncryptionMode encryptionMode, bool leaveOpen)
         {
@@ -113,19 +113,23 @@ namespace XChaChaDotNet
         #region IDisposable
         protected override void Dispose(bool disposing)
         {
-            try
+            if (!this.disposed)
             {
-                if (disposing)
+                try
                 {
-                    this.state?.Dispose();
+                    if (disposing)
+                    {
+                        this.state?.Dispose();
 
-                    if (!this.leaveOpen)
-                        this.stream?.Dispose();
+                        if (!this.leaveOpen)
+                            this.stream?.Dispose();
+                    }
                 }
-            }
-            finally
-            {
-                base.Dispose(disposing);
+                finally
+                {
+                    base.Dispose(disposing);
+                    this.disposed = true;
+                }
             }
         }
         #endregion
