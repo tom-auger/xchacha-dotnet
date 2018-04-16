@@ -92,7 +92,7 @@ namespace XChaChaDotNet
 
         public override void SetLength(long value) => throw new NotSupportedException();
 
-        public bool VerifyEndOfCipherStream() => 
+        public bool VerifyEndOfMessage() => 
             this.tagOfLastDecryptedBlock == crypto_secretstream_xchacha20poly1305_TAG_FINAL;
 
         private protected static int CalculateCiphertextLength(int plaintextLength)

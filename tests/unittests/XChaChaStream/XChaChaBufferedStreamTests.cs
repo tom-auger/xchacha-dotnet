@@ -154,7 +154,7 @@ namespace XChaChaDotNet.UnitTests
         }
 
         [Fact]
-        public void Test_Decrypt_VerifyEndOfStream_FalseWhenPartiallyDecrypted()
+        public void Test_Decrypt_VerifyEndOfMessage_FalseWhenPartiallyDecrypted()
         {
             using (var cipherTextStream = new MemoryStream())
             using (var key = XChaChaKey.Generate())
@@ -173,13 +173,13 @@ namespace XChaChaDotNet.UnitTests
                     var decryptedPlainText = new byte[plainText.Length];
 
                     decryptionStream.Read(decryptedPlainText, 0, decryptedPlainText.Length / 2);
-                    Assert.False(decryptionStream.VerifyEndOfCipherStream());
+                    Assert.False(decryptionStream.VerifyEndOfMessage());
                 }
             }
         }
 
         [Fact]
-        public void Test_Decrypt_VerifyEndOfStream_TrueWhenFullyDecrypted()
+        public void Test_Decrypt_VerifyEndOfMessage_TrueWhenFullyDecrypted()
         {
             using (var cipherTextStream = new MemoryStream())
             using (var key = XChaChaKey.Generate())
@@ -198,7 +198,7 @@ namespace XChaChaDotNet.UnitTests
                     var decryptedPlainText = new byte[plainText.Length];
 
                     decryptionStream.Read(decryptedPlainText);
-                    Assert.True(decryptionStream.VerifyEndOfCipherStream());
+                    Assert.True(decryptionStream.VerifyEndOfMessage());
                 }
             }
         }
