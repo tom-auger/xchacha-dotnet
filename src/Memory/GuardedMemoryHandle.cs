@@ -19,6 +19,13 @@ namespace XChaChaDotNet
         {
             handle = sodium_malloc((UIntPtr)length);
             handle.length = length;
+            
+            // GC.AddMemoryPressure informs the runtime of a large allocation of unmanaged memory that should be 
+            // taken into account when scheduling garbage collection.
+            // 16 = length of the canary
+            // 0x3FFF = 4 * dwPageSize (on Windows x64 dwPageSize is 0xFFF = 4096 bytes). 
+            // Sodium rounds (length + dwPageSize) down to the nearest dwPageSize, and then adds 3 * dwPageSize extra. 
+            // Thus (length + 16 + 0x3FFF) is initial amount to allocate and & ~(0xFFF) rounds down to the nearest dwPageSize
             GC.AddMemoryPressure((length + 16 + 0x3FFF) & ~0xFFF);
         }
 
