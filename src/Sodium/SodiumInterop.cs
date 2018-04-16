@@ -40,7 +40,7 @@
             out UInt64 clen_p,
             in byte m,
             UInt64 mlen,
-            IntPtr ad,
+            ref byte ad,
             UInt64 adlen,
             byte tag);
 
@@ -59,7 +59,7 @@
             out byte tag_p,
             in byte c,
             UInt64 clen,
-            IntPtr ad,
+            ref byte ad,
             UInt64 adlen);
 
         // State
@@ -86,7 +86,7 @@
         public static extern GuardedMemoryHandle sodium_malloc(UIntPtr size);
 
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int sodium_mprotect_readonly(GuardedMemoryHandle ptr);        
+        public static extern int sodium_mprotect_readonly(GuardedMemoryHandle ptr);
 
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void sodium_free(IntPtr ptr);

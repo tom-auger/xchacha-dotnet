@@ -81,7 +81,7 @@ namespace XChaChaDotNet
                     out var tag,
                     in MemoryMarshal.GetReference(this.ciphertextBuffer.AsReadOnlySpan()),
                     (UInt64)bytesRead,
-                    IntPtr.Zero,
+                    ref MemoryMarshal.GetReference(ReadOnlySpan<byte>.Empty),
                     0);
 
                 // Throw an error if the decrypt failed
@@ -206,7 +206,7 @@ namespace XChaChaDotNet
                     out var cipherTextLength,
                     in MemoryMarshal.GetReference(block),
                     (ulong)block.Length,
-                    IntPtr.Zero,
+                    ref MemoryMarshal.GetReference(ReadOnlySpan<byte>.Empty),
                     0,
                     tag);
 

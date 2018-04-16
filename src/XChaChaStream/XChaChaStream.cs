@@ -13,7 +13,7 @@ namespace XChaChaDotNet
         {
         }
 
-        public override int Read(Span<byte> destination)
+        public int Read(Span<byte> destination, ReadOnlySpan<byte> additionalData)
         {
             var inputSize = CalculateCiphertextLength(destination.Length);
             using (var ciphertextBuffer = new RentedArray(inputSize))
@@ -28,8 +28,8 @@ namespace XChaChaDotNet
                        out var tag,
                        in MemoryMarshal.GetReference(ciphertextBuffer.AsReadOnlySpan()),
                        (UInt64)bytesRead,
-                       IntPtr.Zero,
-                       0);
+                       ref MemoryMarshal.GetReference(additionalData),
+                       (UInt64)additionalData.Length);
 
                 if (decryptResult != 0) throw new CryptographicException("block is invalid or corrupt");
                 this.tagOfLastDecryptedBlock = tag;
@@ -38,9 +38,20 @@ namespace XChaChaDotNet
             }
         }
 
+        public override int Read(Span<byte> destination)
+        {
+            return this.Read(destination, ReadOnlySpan<byte>.Empty);
+        }
+
+        public void Write(ReadOnlySpan<byte> source, ReadOnlySpan<byte> additionalData)
+        {
+            this.EncryptBlock(source, additionalData, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE);
+
+        }
+
         public override void Write(ReadOnlySpan<byte> source)
         {
-            this.EncryptBlock(source, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE);
+            this.Write(source, ReadOnlySpan<byte>.Empty);
         }
 
         public void WriteFinal(byte[] buffer, int offset, int count)
@@ -50,9 +61,14 @@ namespace XChaChaDotNet
             this.WriteFinal(source);
         }
 
+        public void WriteFinal(ReadOnlySpan<byte> source, ReadOnlySpan<byte> additionalData)
+        {
+            this.EncryptBlock(source, additionalData, crypto_secretstream_xchacha20poly1305_TAG_FINAL);
+        }
+
         public void WriteFinal(ReadOnlySpan<byte> source)
         {
-            this.EncryptBlock(source, crypto_secretstream_xchacha20poly1305_TAG_FINAL);
+            this.WriteFinal(source, ReadOnlySpan<byte>.Empty);
         }
 
         public override void Flush()
@@ -63,7 +79,7 @@ namespace XChaChaDotNet
             }
         }
 
-        private void EncryptBlock(ReadOnlySpan<byte> source, byte tag)
+        private void EncryptBlock(ReadOnlySpan<byte> source, ReadOnlySpan<byte> additionalData, byte tag)
         {
             if (!this.CanWrite) throw new NotSupportedException();
 
@@ -84,8 +100,8 @@ namespace XChaChaDotNet
                            out var ciphertextLength,
                            in MemoryMarshal.GetReference(source),
                            (ulong)count,
-                           IntPtr.Zero,
-                           0,
+                           ref MemoryMarshal.GetReference(additionalData),
+                           (UInt64)additionalData.Length,
                            tag);
 
                     if (encryptionResult != 0) throw new CryptographicException("encryption of block failed");
