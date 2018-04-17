@@ -7,7 +7,14 @@
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<EncryptionStreamTest>();
+            var switcher = new BenchmarkSwitcher(
+                new[] 
+                {
+                    typeof(EncryptionStreamTest),
+                    typeof(DecryptionStreamTest)
+                });
+
+            switcher.Run(args);
         }
     }
 }
