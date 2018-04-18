@@ -4,12 +4,19 @@ namespace XChaChaDotNet
     using System.Runtime.InteropServices;
     using static SodiumInterop;
 
+    /// <summary>
+    /// Represents an encryption key to be used with the XChaCha cipher.
+    /// </summary>
     public sealed class XChaChaKey : IDisposable
     {
         private readonly GuardedMemoryHandle handle;
         
         private bool disposed;
 
+        /// <summary>
+        /// Create a new instance from an existing key.
+        /// </summary>
+        /// <param name="key">The key.</param>
         public XChaChaKey(ReadOnlySpan<byte> key)
         {
             Sodium.Initialize();
@@ -27,6 +34,10 @@ namespace XChaChaDotNet
             this.handle = handle;
         }
 
+        /// <summary>
+        /// Creates a new randomly generated key.
+        /// </summary>
+        /// <returns>A new randomly generated key.</returns>
         public static XChaChaKey Generate()
         {
             Sodium.Initialize();
@@ -54,6 +65,9 @@ namespace XChaChaDotNet
             }
         }
 
+        /// <summary>
+        /// Disposes the key, immediately removing it from memory.
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);

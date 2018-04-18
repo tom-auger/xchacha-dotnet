@@ -6,6 +6,9 @@ namespace XChaChaDotNet
     using System.Security.Cryptography;
     using static SodiumInterop;
 
+    /// <summary>
+    /// Base class for XChaCha stream implementations.
+    /// </summary>
     public abstract class XChaChaStreamBase : Stream
     {
         private protected readonly EncryptionMode encryptionMode;
@@ -19,7 +22,7 @@ namespace XChaChaDotNet
         private protected byte tagOfLastDecryptedBlock;
         private protected bool disposed;
 
-        protected XChaChaStreamBase(Stream stream, XChaChaKey key, EncryptionMode encryptionMode, bool leaveOpen)
+        private protected XChaChaStreamBase(Stream stream, XChaChaKey key, EncryptionMode encryptionMode, bool leaveOpen)
         {
             Sodium.Initialize();
 
@@ -54,26 +57,51 @@ namespace XChaChaDotNet
                 throw new CryptographicException("crypto stream initialization failed");
         }
 
+        /// <summary>
+        /// Whether reading is supported.
+        /// </summary>
         public override bool CanRead =>
             this.encryptionMode == EncryptionMode.Decrypt &&
             this.stream != null &&
             this.stream.CanRead;
 
+        /// <summary>
+        /// Whether writing is supported.
+        /// </summary>
         public override bool CanWrite =>
             this.encryptionMode == EncryptionMode.Encrypt &&
             this.stream != null &&
             this.stream.CanWrite;
 
+        /// <summary>
+        /// Whether seeking is supported. This is always false.
+        /// </summary>
         public override bool CanSeek => false;
 
+        /// <summary>
+        /// This property is not supported and throws a <see cref="NotSupportedException" />.
+        /// </summary>
+        /// <returns></returns>
         public override long Length => throw new NotSupportedException();
 
+        /// <summary>
+        /// This property is not supported and will throw a <see cref="NotSupportedException" />.
+        /// </summary>
+        /// <returns></returns>
         public override long Position
         {
             get => throw new NotSupportedException();
             set => throw new NotSupportedException();
         }
 
+        /// <summary>
+        /// Decrypts the inner stream and populates <paramref name="buffer"/> with at most 
+        /// <paramref name="count" /> bytes of the resulting plaintext, starting from <paramref name="offset"/>.
+        /// </summary>
+        /// <param name="buffer">The buffer where plaintext will be output to.</param>
+        /// <param name="offset">The offset within the buffer to begin writing the plaintext.</param>
+        /// <param name="count">The maximum number of bytes to output.</param>
+        /// <returns>The number of bytes written to <paramref name="buffer" />.</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
             this.ValidateParameters(buffer, offset, count);
@@ -81,6 +109,12 @@ namespace XChaChaDotNet
             return this.Read(destination);
         }
 
+        /// <summary>
+        /// Encrypts the <paramref name="buffer"/> and writes the resulting ciphertext to the inner stream.
+        /// </summary>
+        /// <param name="buffer">The plaintext to encrypt.</param>
+        /// <param name="offset">The offset within the buffer to begin using.</param>
+        /// <param name="count">The number of bytes to read from the offset.</param>
         public override void Write(byte[] buffer, int offset, int count)
         {
             this.ValidateParameters(buffer, offset, count);
@@ -88,10 +122,25 @@ namespace XChaChaDotNet
             this.Write(source);
         }
 
+        /// <summary>
+        /// This method is not supported and will throw a <see cref="NotSupportedException" />.
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <param name="origin"></param>
+        /// <returns></returns>
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
 
+        /// <summary>
+        /// This method is not supported and will throw a <see cref="NotSupportedException" />.
+        /// </summary>
+        /// <param name="value"></param>
         public override void SetLength(long value) => throw new NotSupportedException();
 
+        /// <summary>
+        /// When the encryption mode is Decrypt, verifies that the last block decrypted was appended with a final tag.
+        /// Use this to confirm that the end of the ciphertext has been reached.
+        /// </summary>
+        /// <returns>Whether the last decrypted block was appended with a final tag.</returns>
         public bool VerifyEndOfMessage() => 
             this.tagOfLastDecryptedBlock == crypto_secretstream_xchacha20poly1305_TAG_FINAL;
 
@@ -116,6 +165,10 @@ namespace XChaChaDotNet
         }
 
         #region IDisposable
+        /// <summary>
+        /// Disposes of all resources.
+        /// </summary>
+        /// <param name="disposing">True if called from <see cref="Dispose"/>.</param>
         protected override void Dispose(bool disposing)
         {
             if (!this.disposed)

@@ -6,6 +6,9 @@ namespace XChaChaDotNet
     using System.Security.Cryptography;
     using static SodiumInterop;
 
+    /// <summary>
+    /// Represents an XChaCha stream cipher that internally buffers the plaintext in order to encrypt in fixed size blocks.
+    /// </summary>
     public class XChaChaBufferedStream : XChaChaStreamBase
     {
         // Default plaintext buffer length 128KB
@@ -15,6 +18,13 @@ namespace XChaChaDotNet
         private readonly RentedArray plaintextBuffer;
         private readonly RentedArray ciphertextBuffer;
 
+        /// <summary>
+        /// Create a new instance with a default buffer length of 128KB.
+        /// </summary>
+        /// <param name="stream">When encrypting, the stream to write the ciphertext to. When decrypting, the stream to read the ciphertext from.</param>
+        /// <param name="key">The encryption key.</param>
+        /// <param name="encryptionMode">Whether the stream will be used for encryption or decryption.</param>
+        /// <param name="leaveOpen">Whether to leave the <paramref name="stream"/> open.</param>
         public XChaChaBufferedStream(
             Stream stream,
             XChaChaKey key,
@@ -26,6 +36,14 @@ namespace XChaChaDotNet
             this.ciphertextBuffer = new RentedArray(CalculateCiphertextLength(DefaultPlaintextBufferLength));
         }
 
+        /// <summary>
+        /// Create a new instance with a custom buffer length.
+        /// </summary>
+        /// <param name="stream">When encrypting, the stream to write the ciphertext to. When decrypting, the stream to read the ciphertext from.</param>
+        /// <param name="key">The encryption key.</param>
+        /// <param name="encryptionMode">Whether the stream will be used for encryption or decryption.</param>
+        /// <param name="bufferLength">The length of the internal buffer.</param>
+        /// <param name="leaveOpen">Whether to leave the <paramref name="stream"/> open</param>
         public XChaChaBufferedStream(
             Stream stream,
             XChaChaKey key,
@@ -38,6 +56,11 @@ namespace XChaChaDotNet
             this.ciphertextBuffer = new RentedArray(CalculateCiphertextLength(bufferLength));
         }
 
+        /// <summary>
+        /// Decrypts the inner stream and populates <paramref name="destination"/> with the resulting plaintext.
+        /// </summary>
+        /// <param name="destination">The buffer where the plaintext will be output to.</param>
+        /// <returns>The number of bytes written to <paramref name="destination"/>.</returns>
         public override int Read(Span<byte> destination)
         {
             if (!this.CanRead) throw new NotSupportedException();
@@ -110,6 +133,10 @@ namespace XChaChaDotNet
             return totalBytesOutput;
         }
 
+        /// <summary>
+        /// Encrypts the <paramref name="source"/> and writes the resulting ciphertext to the inner stream.
+        /// </summary>
+        /// <param name="source">The plaintext to encrypt.</param>
         public override void Write(ReadOnlySpan<byte> source)
         {
             if (!this.CanWrite) throw new NotSupportedException();
@@ -162,12 +189,22 @@ namespace XChaChaDotNet
             }
         }
 
+        /// <summary>
+        /// When the encryption mode is Encrypt, writes any data remaining in the internal buffer to the stream, 
+        /// with the expectation that more data will be written.
+        /// If no more data will be written use <see cref="FlushFinal"/>.
+        /// </summary>
         public override void Flush()
         {
             if (this.encryptionMode == EncryptionMode.Encrypt)
                 this.EncryptPlainTextBuffer(crypto_secretstream_xchacha20poly1305_TAG_MESSAGE);
         }
 
+        /// <summary>
+        /// When the encryption mode is Encrypt, writes any data remaining in the internal buffer, 
+        /// appending a final tag to the last block.
+        /// Only call this if no more data will be written, otherwise use <see cref="Flush"/>.
+        /// </summary>
         public void FlushFinal()
         {
             if (this.encryptionMode == EncryptionMode.Encrypt)
@@ -217,6 +254,10 @@ namespace XChaChaDotNet
         }
 
         #region IDisposable
+        /// <summary>
+        /// Flushes the internal buffer and disposes all resources.
+        /// </summary>
+        /// <param name="disposing">True if called from <see cref="Dispose"/>.</param>
         protected override void Dispose(bool disposing)
         {
             if (!this.disposed)
