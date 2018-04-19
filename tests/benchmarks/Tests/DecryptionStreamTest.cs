@@ -8,7 +8,6 @@ namespace XChaChaDotNet.Benchmarks
     public class DecryptionStreamTest
     {
         private XChaChaKey key;
-        private byte[] plaintext;
         private MemoryStream nonBufferedCiphertextStream;
         private MemoryStream bufferedCiphertextStream;
         private byte[] bufferedOutput = new byte[1024 * 1024];
