@@ -10,13 +10,13 @@ namespace XChaChaDotNet.Benchmarks
         private XChaChaKey key;
         private byte[] data;
 
-        [Params(1024, 128 * 1024, 256 * 1024, 512 * 1024)]
-        public int N { get; set; }
+        [Params(1, 128, 256, 512)]
+        public int DataLengthKb { get; set; }
 
         [GlobalSetup]
         public void GlobalSetup()
         {
-            this.data = new byte[N];
+            this.data = new byte[this.DataLengthKb * 1024];
             new Random(31).NextBytes(data);
             this.key = XChaChaKey.Generate();
         }

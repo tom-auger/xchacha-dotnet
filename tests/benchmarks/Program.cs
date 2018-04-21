@@ -11,7 +11,8 @@
                 new[] 
                 {
                     typeof(EncryptionStreamTest),
-                    typeof(DecryptionStreamTest)
+                    typeof(DecryptionStreamTest),
+                    typeof(BufferSizeTest)
                 });
 
             switcher.Run(args);

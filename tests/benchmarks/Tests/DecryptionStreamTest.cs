@@ -13,24 +13,26 @@ namespace XChaChaDotNet.Benchmarks
         private byte[] bufferedOutput = new byte[1024 * 1024];
         private byte[] nonBufferedOutput = new byte[1024 * 1024];
 
-        [Params(1024, 128 * 1024, 256 * 1024, 512 * 1024)]
-        public int N { get; set; }
+        [Params(1, 128, 256, 512)]
+        public int DataLengthKb { get; set; }
 
         [GlobalSetup]
         public void GlobalSetup()
         {
-            var data = new byte[N];
+            var data = new byte[this.DataLengthKb * 1024];
             new Random(31).NextBytes(data);
             this.nonBufferedCiphertextStream = new MemoryStream();
             this.bufferedCiphertextStream = new MemoryStream();
             this.key = XChaChaKey.Generate();
 
-            using (var bufferedEncryptionStream = new XChaChaBufferedStream(this.bufferedCiphertextStream, this.key, EncryptionMode.Encrypt, leaveOpen: true))
+            using (var bufferedEncryptionStream = new XChaChaBufferedStream(
+                this.bufferedCiphertextStream, this.key, EncryptionMode.Encrypt, leaveOpen: true))
             {
                 bufferedEncryptionStream.Write(data);
             }
 
-            using (var encryptionStream = new XChaChaStream(this.nonBufferedCiphertextStream, this.key, EncryptionMode.Encrypt, leaveOpen: true))
+            using (var encryptionStream = new XChaChaStream(
+                this.nonBufferedCiphertextStream, this.key, EncryptionMode.Encrypt, leaveOpen: true))
             {
                 encryptionStream.WriteFinal(data);
             }
@@ -40,7 +42,8 @@ namespace XChaChaDotNet.Benchmarks
         public void BufferedStream()
         {
             this.bufferedCiphertextStream.Position = 0;
-            using (var decryptionStream = new XChaChaBufferedStream(this.bufferedCiphertextStream, this.key, EncryptionMode.Decrypt, leaveOpen: true))
+            using (var decryptionStream = new XChaChaBufferedStream(
+                this.bufferedCiphertextStream, this.key, EncryptionMode.Decrypt, leaveOpen: true))
             {
                 decryptionStream.Read(this.bufferedOutput);
             }
@@ -50,7 +53,8 @@ namespace XChaChaDotNet.Benchmarks
         public void StandardStream()
         {
             this.nonBufferedCiphertextStream.Position = 0;
-            using (var decryptionStream = new XChaChaStream(nonBufferedCiphertextStream, this.key, EncryptionMode.Decrypt, leaveOpen: true))
+            using (var decryptionStream = new XChaChaStream(
+                nonBufferedCiphertextStream, this.key, EncryptionMode.Decrypt, leaveOpen: true))
             {
                 decryptionStream.Read(this.nonBufferedOutput);
             }
