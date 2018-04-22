@@ -12,7 +12,7 @@ namespace XChaChaDotNet
         {
             if (nonceBytes.Length != crypto_secretbox_xchacha20poly1305_NONCEBYTES)
                 throw new ArgumentException($"{nameof(nonceBytes)} has incorrect length");
-            
+
             this.bytes = nonceBytes;
         }
 
@@ -28,7 +28,7 @@ namespace XChaChaDotNet
 
             Span<byte> nonceBytes = new byte[crypto_secretbox_xchacha20poly1305_NONCEBYTES];
             randombytes_buf(
-                ref MemoryMarshal.GetReference(nonceBytes), 
+                ref MemoryMarshal.GetReference(nonceBytes),
                 (UIntPtr)crypto_secretbox_xchacha20poly1305_NONCEBYTES);
 
             return new XChaChaNonce(nonceBytes);

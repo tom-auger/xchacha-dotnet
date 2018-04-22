@@ -41,9 +41,9 @@ namespace XChaChaDotNet
             return returnCode == 0;
         }
 
-        public static int GetCipherTextLength(int plaintextLength) => 
+        public static int GetCipherTextLength(int plaintextLength) =>
             plaintextLength + crypto_secretbox_xchacha20poly1305_MACBYTES;
-        
+
         private static int GetPlaintextLength(int ciphertextLength) =>
             ciphertextLength - crypto_secretbox_xchacha20poly1305_MACBYTES;
 
@@ -51,7 +51,7 @@ namespace XChaChaDotNet
         {
             if (ciphertext.Length < GetCipherTextLength(message.Length))
                 throw new ArgumentException($"{nameof(ciphertext)} buffer is not large enough");
-            
+
             ValidateNonce(nonce);
         }
 
@@ -59,7 +59,7 @@ namespace XChaChaDotNet
         {
             if (message.Length < GetPlaintextLength(ciphertext.Length))
                 throw new ArgumentException($"{nameof(message)} buffer is not large enough");
-            
+
             ValidateNonce(nonce);
         }
 
