@@ -92,7 +92,7 @@
             in byte m,
             UInt64 mlen,
             in byte n,
-            in byte k);
+            GuardedMemoryHandle k);
 
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int crypto_secretbox_xchacha20poly1305_open_easy(
@@ -100,7 +100,7 @@
             in byte c,
             UInt64 clen,
             in byte n,
-            in byte k);
+            GuardedMemoryHandle k);
         #endregion
 
         #region SecureMemory
@@ -112,6 +112,13 @@
 
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void sodium_free(IntPtr ptr);
+        #endregion
+
+        #region RandomBytes
+        [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void randombytes_buf(
+            ref byte buf,
+            UIntPtr size);
         #endregion
     }
 }
