@@ -81,6 +81,28 @@
         }
         #endregion
 
+        #region XChaCha20Poly1305SecretBox
+        public const int crypto_secretbox_xchacha20poly1305_KEYBYTES = 32;
+        public const int crypto_secretbox_xchacha20poly1305_NONCEBYTES = 24;
+        public const int crypto_secretbox_xchacha20poly1305_MACBYTES = 16;
+
+        [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int crypto_secretbox_xchacha20poly1305_easy(
+            ref byte c,
+            in byte m,
+            UInt64 mlen,
+            in byte n,
+            in byte k);
+
+        [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int crypto_secretbox_xchacha20poly1305_open_easy(
+            ref byte m,
+            in byte c,
+            UInt64 clen,
+            in byte n,
+            in byte k);
+        #endregion
+
         #region SecureMemory
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern GuardedMemoryHandle sodium_malloc(UIntPtr size);
