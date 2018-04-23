@@ -25,7 +25,7 @@ namespace XChaChaDotNet.UnitTests
 
                 var cipherText = outputStream.ToArray();
 
-                var expectedCipherTextLength = HeaderLength + plainText.Length + ABytes;
+                var expectedCipherTextLength = StreamHeaderLength + plainText.Length + StreamABytes;
                 Assert.Equal(expectedCipherTextLength, cipherText.Length);
             }
         }
@@ -44,7 +44,7 @@ namespace XChaChaDotNet.UnitTests
 
                 var cipherText = outputStream.ToArray();
 
-                Assert.Equal(HeaderLength, cipherText.Length);
+                Assert.Equal(StreamHeaderLength, cipherText.Length);
             }
         }
 
@@ -61,7 +61,7 @@ namespace XChaChaDotNet.UnitTests
                 encryptionStream.Flush();
 
                 var cipherText = outputStream.ToArray();
-                Assert.Equal(HeaderLength, cipherText.Length);
+                Assert.Equal(StreamHeaderLength, cipherText.Length);
             }
         }
 
@@ -74,7 +74,7 @@ namespace XChaChaDotNet.UnitTests
 
             var totalPlainTextLength = plainText1.Length + plainText2.Length + plaintext3.Length;
             const int numberOfWrites = 3;
-            var expectedOutputLength = HeaderLength + totalPlainTextLength + (numberOfWrites * ABytes);
+            var expectedOutputLength = StreamHeaderLength + totalPlainTextLength + (numberOfWrites * StreamABytes);
 
             using (var outputStream = new MemoryStream())
             {
@@ -108,7 +108,7 @@ namespace XChaChaDotNet.UnitTests
 
                 var cipherText = outputStream.ToArray();
 
-                var expectedCipherTextLength = HeaderLength + plainText.Length + ABytes;
+                var expectedCipherTextLength = StreamHeaderLength + plainText.Length + StreamABytes;
                 Assert.Equal(expectedCipherTextLength, cipherText.Length);
             }
         }
@@ -125,7 +125,7 @@ namespace XChaChaDotNet.UnitTests
 
             var totalPlainTextLength = plainText1.Length + plainText2.Length + plaintext3.Length;
             const int numberOfWrites = 3;
-            var expectedOutputLength = HeaderLength + totalPlainTextLength + (numberOfWrites * ABytes);
+            var expectedOutputLength = StreamHeaderLength + totalPlainTextLength + (numberOfWrites * StreamABytes);
 
             using (var outputStream = new MemoryStream())
             {

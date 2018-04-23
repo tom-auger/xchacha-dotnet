@@ -34,7 +34,7 @@ namespace XChaChaDotNet.UnitTests
 
                 // The encryption stream encrypts in 128KB blocks
                 const int numberOfBlocks = 1;
-                var expectedCipherTextLength = plainText.Length + HeaderLength + (ABytes * numberOfBlocks);
+                var expectedCipherTextLength = plainText.Length + StreamHeaderLength + (StreamABytes * numberOfBlocks);
                 Assert.Equal(expectedCipherTextLength, cipherText.Length);
             }
         }
@@ -56,7 +56,7 @@ namespace XChaChaDotNet.UnitTests
                 var cipherText = outputStream.ToArray();
 
                 var numberOfBlocks = Math.Ceiling((decimal)plainText.Length / bufferLength);
-                var expectedCipherTextLength = plainText.Length + HeaderLength + (ABytes * numberOfBlocks);
+                var expectedCipherTextLength = plainText.Length + StreamHeaderLength + (StreamABytes * numberOfBlocks);
                 Assert.Equal(expectedCipherTextLength, cipherText.Length);
             }
         }
@@ -76,7 +76,7 @@ namespace XChaChaDotNet.UnitTests
 
                 var cipherText = outputStream.ToArray();
 
-                Assert.Equal(HeaderLength, cipherText.Length);
+                Assert.Equal(StreamHeaderLength, cipherText.Length);
             }
         }
 
@@ -93,7 +93,7 @@ namespace XChaChaDotNet.UnitTests
                 encryptionStream.Flush();
 
                 var cipherText = outputStream.ToArray();
-                Assert.Equal(HeaderLength, cipherText.Length);
+                Assert.Equal(StreamHeaderLength, cipherText.Length);
             }
         }
 
@@ -107,7 +107,7 @@ namespace XChaChaDotNet.UnitTests
 
             var totalPlainTextLength = plainText1.Length + plainText2.Length + plaintext3.Length;
             var numberOfBlocks = Math.Ceiling((decimal)totalPlainTextLength / bufferLength);
-            var expectedOutputLength = HeaderLength + totalPlainTextLength + (numberOfBlocks * ABytes);
+            var expectedOutputLength = StreamHeaderLength + totalPlainTextLength + (numberOfBlocks * StreamABytes);
 
             using (var outputStream = new MemoryStream())
             {

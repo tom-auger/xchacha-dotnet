@@ -164,7 +164,7 @@ namespace XChaChaDotNet.UnitTests
         public void Test_CanWrite_Decrypt_False(Type streamType)
         {
             using (var key = XChaChaKey.Generate())
-            using (var plaintextStream = new MemoryStream(new byte[HeaderLength]))
+            using (var plaintextStream = new MemoryStream(new byte[StreamHeaderLength]))
             using (var xchachaStream = (XChaChaStreamBase)Activator.CreateInstance(streamType, plaintextStream, key, EncryptionMode.Decrypt, false))
             {
                 Assert.False(xchachaStream.CanWrite);
