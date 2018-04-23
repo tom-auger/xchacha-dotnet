@@ -71,8 +71,13 @@ namespace XChaChaDotNet
         public static int GetCipherTextLength(int plaintextLength) =>
             plaintextLength + crypto_secretbox_xchacha20poly1305_MACBYTES;
 
-        private static int GetPlaintextLength(int ciphertextLength) =>
-            ciphertextLength - crypto_secretbox_xchacha20poly1305_MACBYTES;
+        /// <summary>
+        /// Calculates the size of the plaintext for a given ciphertext length.
+        /// </summary>
+        /// <param name="ciphertextLength">The length of the ciphertext.</param>
+        /// <returns>The length of the plaintext.</returns>
+        public static int GetPlaintextLength(int ciphertextLength) =>
+            Math.Max(0, ciphertextLength - crypto_secretbox_xchacha20poly1305_MACBYTES);
 
         private static void ValidateEncryptParameters(ReadOnlySpan<byte> message, Span<byte> ciphertext, XChaChaNonce nonce)
         {

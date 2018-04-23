@@ -131,6 +131,37 @@ namespace XChaChaDotNet
                 Assert.Equal("message buffer is not large enough", exception.Message);
             }
         }
+
+        [Fact]
+        public void Test_Decryption_InPlace_DecryptsCiphertext()
+        {
+            using (var key = XChaChaKey.Generate())
+            {
+                var secretBox = new XChaChaSecretBox(key);
+                var nonce = XChaChaNonce.Generate();
+
+                const int messageLength = 1024 * 1024;
+                var message = RandomBytesGenerator.NextBytes(messageLength);
+                var cipherText = new byte[XChaChaSecretBox.GetCipherTextLength(message.Length)];
+
+                secretBox.Encrypt(message, cipherText, nonce);
+
+                var result = secretBox.Decrypt(cipherText, cipherText, nonce);
+                Assert.True(result);
+                Assert.Equal(message.ToArray(), cipherText.Take(messageLength));
+            }
+        }
+
+        [Theory]
+        [InlineData(4, 0)]
+        [InlineData(15, 0)]
+        [InlineData(17, 1)]
+        [InlineData(1024, 1008)]
+        public void Test_GetPlaintextLength_ReturnsCorrectLength(int ciphertextLength, int expectedPlaintextLength)
+        {
+            var plaintextLength = XChaChaSecretBox.GetPlaintextLength(ciphertextLength);
+            Assert.Equal(expectedPlaintextLength, plaintextLength);
+        }
         #endregion
     }
 }
