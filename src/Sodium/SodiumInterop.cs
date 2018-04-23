@@ -103,7 +103,7 @@
             GuardedMemoryHandle k);
         #endregion
 
-        #region SecureMemory
+        #region GuardedMemory
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern GuardedMemoryHandle sodium_malloc(UIntPtr size);
 
