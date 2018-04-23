@@ -8,11 +8,12 @@
         static void Main(string[] args)
         {
             var switcher = new BenchmarkSwitcher(
-                new[] 
+                new[]
                 {
                     typeof(EncryptionStreamTest),
                     typeof(DecryptionStreamTest),
-                    typeof(BufferSizeTest)
+                    typeof(BufferSizeTest),
+                    typeof(SecretBoxTest)
                 });
 
             switcher.Run(args);
