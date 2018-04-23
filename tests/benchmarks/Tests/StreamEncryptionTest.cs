@@ -5,7 +5,7 @@ namespace XChaChaDotNet.Benchmarks
     using System.IO;
     using XChaChaDotNet;
 
-    public class EncryptionStreamTest
+    public class StreamEncryptionTest
     {
         private XChaChaKey key;
         private byte[] data;

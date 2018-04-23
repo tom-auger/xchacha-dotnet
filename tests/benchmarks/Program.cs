@@ -10,9 +10,9 @@
             var switcher = new BenchmarkSwitcher(
                 new[]
                 {
-                    typeof(EncryptionStreamTest),
-                    typeof(DecryptionStreamTest),
-                    typeof(BufferSizeTest),
+                    typeof(StreamEncryptionTest),
+                    typeof(StreamDecryptionTest),
+                    typeof(StreamBufferSizeTest),
                     typeof(SecretBoxTest)
                 });
 

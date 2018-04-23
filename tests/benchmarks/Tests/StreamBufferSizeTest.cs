@@ -5,7 +5,7 @@ namespace XChaChaDotNet.Benchmarks
     using System.IO;
     using XChaChaDotNet;
 
-    public class BufferSizeTest
+    public class StreamBufferSizeTest
     {
         private const int DataLength = 5 * 1024 * 1024;
 
