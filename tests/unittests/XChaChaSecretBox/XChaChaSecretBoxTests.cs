@@ -2,6 +2,7 @@ namespace XChaChaDotNet
 {
     using System;
     using System.Linq;
+    using System.Security.Cryptography;
     using XChaChaDotNet.UnitTests;
     using Xunit;
 
@@ -17,11 +18,11 @@ namespace XChaChaDotNet
                 var nonce = XChaChaNonce.Generate();
 
                 var message = RandomBytesGenerator.NextBytes(1024 * 1024);
-                var cipherText = new byte[XChaChaSecretBox.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[XChaChaSecretBox.GetCipherTextLength(message.Length)];
 
-                secretBox.Encrypt(message, cipherText, nonce);
+                secretBox.Encrypt(message, ciphertext, nonce);
 
-                Assert.False(cipherText.All(b => b == 0));
+                Assert.False(ciphertext.All(b => b == 0));
             }
         }
 
@@ -33,12 +34,12 @@ namespace XChaChaDotNet
                 var secretBox = new XChaChaSecretBox(key);
 
                 var message = Array.Empty<byte>();
-                var cipherText = new byte[XChaChaSecretBox.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[XChaChaSecretBox.GetCipherTextLength(message.Length)];
 
                 Action action = () =>
                     {
                         XChaChaNonce nonce;
-                        secretBox.Encrypt(message, cipherText, nonce);
+                        secretBox.Encrypt(message, ciphertext, nonce);
                     };
 
                 var exception = Assert.Throws<ArgumentException>(action);
@@ -54,23 +55,38 @@ namespace XChaChaDotNet
                 var secretBox = new XChaChaSecretBox(key);
 
                 var message = Array.Empty<byte>();
-                var cipherText = Array.Empty<byte>();
+                var ciphertext = Array.Empty<byte>();
 
                 Action action = () =>
                     {
                         XChaChaNonce nonce;
-                        secretBox.Encrypt(message, cipherText, nonce);
+                        secretBox.Encrypt(message, ciphertext, nonce);
                     };
 
                 var exception = Assert.Throws<ArgumentException>(action);
                 Assert.Equal("ciphertext buffer is not large enough", exception.Message);
             }
         }
+
+        [Fact]
+        public void Test_Encrypt_ReturnsCiphertext()
+        {
+            using (var key = XChaChaKey.Generate())
+            {
+                var secretBox = new XChaChaSecretBox(key);
+                var nonce = XChaChaNonce.Generate();
+
+                var message = RandomBytesGenerator.NextBytes(1024 * 1024);
+                var ciphertext = secretBox.Encrypt(message, nonce);
+
+                Assert.False(ciphertext.ToArray().All(b => b == 0));
+            }
+        }
         #endregion
 
         #region Decryption
         [Fact]
-        public void Test_Decrypt_CanDecryptCiphertext()
+        public void Test_TryDecrypt_CanDecryptCiphertext()
         {
             using (var key = XChaChaKey.Generate())
             {
@@ -79,12 +95,12 @@ namespace XChaChaDotNet
 
                 const int messageLength = 1024 * 1024;
                 var message = RandomBytesGenerator.NextBytes(messageLength);
-                var cipherText = new byte[XChaChaSecretBox.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[XChaChaSecretBox.GetCipherTextLength(message.Length)];
 
-                secretBox.Encrypt(message, cipherText, nonce);
+                secretBox.Encrypt(message, ciphertext, nonce);
 
                 var decryptedMessage = new byte[messageLength];
-                var result = secretBox.Decrypt(cipherText, decryptedMessage, nonce);
+                var result = secretBox.TryDecrypt(ciphertext, decryptedMessage, nonce);
                 Assert.True(result);
                 Assert.Equal(message.ToArray(), decryptedMessage);
             }
@@ -98,12 +114,12 @@ namespace XChaChaDotNet
                 var secretBox = new XChaChaSecretBox(key);
 
                 var message = Array.Empty<byte>();
-                var cipherText = Array.Empty<byte>();
+                var ciphertext = Array.Empty<byte>();
 
                 Action action = () =>
                     {
                         XChaChaNonce nonce;
-                        secretBox.Decrypt(cipherText, message, nonce);
+                        secretBox.Decrypt(ciphertext, message, nonce);
                     };
 
                 var exception = Assert.Throws<ArgumentException>(action);
@@ -119,12 +135,12 @@ namespace XChaChaDotNet
                 var secretBox = new XChaChaSecretBox(key);
 
                 var message = Array.Empty<byte>();
-                var cipherText = new byte[XChaChaSecretBox.GetCipherTextLength(1)];
+                var ciphertext = new byte[XChaChaSecretBox.GetCipherTextLength(1)];
 
                 Action action = () =>
                     {
                         XChaChaNonce nonce;
-                        secretBox.Decrypt(cipherText, message, nonce);
+                        secretBox.Decrypt(ciphertext, message, nonce);
                     };
 
                 var exception = Assert.Throws<ArgumentException>(action);
@@ -133,7 +149,7 @@ namespace XChaChaDotNet
         }
 
         [Fact]
-        public void Test_Decryption_InPlace_DecryptsCiphertext()
+        public void Test_TryDecrypt_InPlace_DecryptsCiphertext()
         {
             using (var key = XChaChaKey.Generate())
             {
@@ -142,13 +158,74 @@ namespace XChaChaDotNet
 
                 const int messageLength = 1024 * 1024;
                 var message = RandomBytesGenerator.NextBytes(messageLength);
-                var cipherText = new byte[XChaChaSecretBox.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[XChaChaSecretBox.GetCipherTextLength(message.Length)];
 
-                secretBox.Encrypt(message, cipherText, nonce);
+                secretBox.Encrypt(message, ciphertext, nonce);
 
-                var result = secretBox.Decrypt(cipherText, cipherText, nonce);
+                var result = secretBox.TryDecrypt(ciphertext, ciphertext, nonce);
                 Assert.True(result);
-                Assert.Equal(message.ToArray(), cipherText.Take(messageLength));
+                Assert.Equal(message.ToArray(), ciphertext.Take(messageLength));
+            }
+        }
+
+        [Fact]
+        public void Test_Decrypt_Fails_ThrowsCryptographicException()
+        {
+            using (var key = XChaChaKey.Generate())
+            {
+                var secretBox = new XChaChaSecretBox(key);
+                var nonce = XChaChaNonce.Generate();
+
+                const int messageLength = 1024 * 1024;
+                var message = RandomBytesGenerator.NextBytes(messageLength);
+                var ciphertext = new byte[XChaChaSecretBox.GetCipherTextLength(message.Length)];
+
+                secretBox.Encrypt(message, ciphertext, nonce);
+
+                Action action = () =>
+                    {
+                        var wrongNonce = XChaChaNonce.Generate();
+                        secretBox.Decrypt(ciphertext, ciphertext, wrongNonce);
+                    };
+                var exception = Assert.Throws<CryptographicException>(action);
+                Assert.Equal("decryption failed", exception.Message);
+            }
+        }
+
+        [Fact]
+        public void Test_TryDecrypt_Fails_ReturnsFalse()
+        {
+            using (var key = XChaChaKey.Generate())
+            {
+                var secretBox = new XChaChaSecretBox(key);
+                var nonce = XChaChaNonce.Generate();
+
+                const int messageLength = 1024 * 1024;
+                var message = RandomBytesGenerator.NextBytes(messageLength);
+                var ciphertext = new byte[XChaChaSecretBox.GetCipherTextLength(message.Length)];
+
+                secretBox.Encrypt(message, ciphertext, nonce);
+
+                var wrongNonce = XChaChaNonce.Generate();
+                var result = secretBox.TryDecrypt(ciphertext, ciphertext, wrongNonce);
+                Assert.False(result);
+            }
+        }
+
+        [Fact]
+        public void Test_Decrypt_ReturnsMessage()
+        {
+            using (var key = XChaChaKey.Generate())
+            {
+                var secretBox = new XChaChaSecretBox(key);
+                var nonce = XChaChaNonce.Generate();
+
+                const int messageLength = 1024 * 1024;
+                var message = RandomBytesGenerator.NextBytes(messageLength);
+                var ciphertext = secretBox.Encrypt(message, nonce);
+
+                var result = secretBox.Decrypt(ciphertext, nonce);
+                Assert.Equal(message.ToArray(), result.ToArray());
             }
         }
 

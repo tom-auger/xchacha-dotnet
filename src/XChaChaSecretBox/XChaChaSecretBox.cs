@@ -23,7 +23,7 @@ namespace XChaChaDotNet
         }
 
         /// <summary>
-        /// Encrypts a <paramref name="message"/> and writes the output to <paramref name="ciphertext"/>.
+        /// Encrypts the <paramref name="message"/> and writes computed ciphertext to <paramref name="ciphertext"/>.
         /// </summary>
         /// <param name="message">The message to encrypt.</param>
         /// <param name="ciphertext">The buffer in which to write the ciphertext.</param>
@@ -41,26 +41,66 @@ namespace XChaChaDotNet
         }
 
         /// <summary>
-        /// Decrypts a <paramref name="ciphertext"/>, verifies the authenticaion tag, and if successful,
+        /// Encrypts the <paramref name="message"/> and returns the computed ciphertext.
+        /// </summary>
+        /// <param name="message">The message to encrypt.</param>
+        /// <param name="nonce">The nonce to use when encrypting the <paramref name="message"/>.</param>
+        /// <returns>The computed ciphertext.</returns>
+        public Span<byte> Encrypt(ReadOnlySpan<byte> message, XChaChaNonce nonce)
+        {
+            var cipherTextLength = GetCipherTextLength(message.Length);
+            var cipherText = new byte[cipherTextLength];
+            this.Encrypt(message, cipherText, nonce);
+            return cipherText;
+        }
+
+        /// <summary>
+        /// Decrypts the <paramref name="ciphertext"/>, verifies the authenticaion tag, and if successful,
+        /// writes the output to <paramref name="message"/>.
+        /// </summary>
+        /// <param name="ciphertext">The ciphertext to decrypt.</param>
+        /// <param name="message">The buffer in which to write the decrypted message.</param>
+        /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
+        public void Decrypt(ReadOnlySpan<byte> ciphertext, Span<byte> message, XChaChaNonce nonce)
+        {
+            ValidateDecryptParameters(ciphertext, message, nonce);
+            var success = this.InternalDecrypt(ciphertext, message, nonce);
+            if (!success) throw new CryptographicException("decryption failed");
+        }
+
+        /// <summary>
+        /// Decrypts the <paramref name="ciphertext"/>, verifies the authenticaion tag, and if successful,
+        /// returns the decrypted message.
+        /// </summary>
+        /// <param name="ciphertext">The ciphertext to decrypt.</param>
+        /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
+        /// <returns>The decrypted message.</returns>
+        public Span<byte> Decrypt(ReadOnlySpan<byte> ciphertext, XChaChaNonce nonce)
+        {
+            var messageLength = GetPlaintextLength(ciphertext.Length);
+            var message = new byte[messageLength];
+            this.Decrypt(ciphertext, message, nonce);
+            return message;
+        }
+
+        /// <summary>
+        /// Tries to decrypt the <paramref name="ciphertext"/>, verifies the authenticaion tag, and if successful,
         /// writes the output to <paramref name="message"/>.
         /// </summary>
         /// <param name="ciphertext">The ciphertext to decrypt.</param>
         /// <param name="message">The buffer in which to write the decrypted message.</param>
         /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
         /// <returns>Whether the decryption succeeded.</returns>
-        public bool Decrypt(ReadOnlySpan<byte> ciphertext, Span<byte> message, XChaChaNonce nonce)
+        public bool TryDecrypt(ReadOnlySpan<byte> ciphertext, Span<byte> message, XChaChaNonce nonce)
         {
-            ValidateDecryptParameters(ciphertext, message, nonce);
-
-            var returnCode =
-                crypto_secretbox_xchacha20poly1305_open_easy(
-                    ref MemoryMarshal.GetReference(message),
-                    in MemoryMarshal.GetReference(ciphertext),
-                    (UInt64)ciphertext.Length,
-                    in nonce.Handle,
-                    this.key.Handle);
-
-            return returnCode == 0;
+            try
+            {
+                return this.InternalDecrypt(ciphertext, message, nonce);
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -99,6 +139,18 @@ namespace XChaChaDotNet
         {
             if (nonce.IsEmpty)
                 throw new ArgumentException($"{nameof(nonce)} is empty");
+        }
+
+        private bool InternalDecrypt(ReadOnlySpan<byte> ciphertext, Span<byte> message, XChaChaNonce nonce)
+        {
+            var returnCode = crypto_secretbox_xchacha20poly1305_open_easy(
+                ref MemoryMarshal.GetReference(message),
+                in MemoryMarshal.GetReference(ciphertext),
+                (UInt64)ciphertext.Length,
+                in nonce.Handle,
+                this.key.Handle);
+
+            return returnCode == 0;
         }
     }
 }
