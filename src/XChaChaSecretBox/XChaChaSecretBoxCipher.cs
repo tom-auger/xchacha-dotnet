@@ -1,4 +1,4 @@
-namespace XChaChaDotNet
+﻿namespace XChaChaDotNet
 {
     using System;
     using System.Runtime.InteropServices;
@@ -9,26 +9,16 @@ namespace XChaChaDotNet
     /// Represents an XChaCha secret box. Recommended for encrypting a single message
     /// with a key and nonce to keep it confidential.
     /// </summary>
-    public class XChaChaSecretBox
+    public class XChaChaSecretBoxCipher : IXChaChaSecretBoxCipher
     {
-        private readonly XChaChaKey key;
-
-        /// <summary>
-        /// Creates an instance using the specified key.
-        /// </summary>
-        /// <param name="key">The key to use for encryption/decryption.</param>
-        public XChaChaSecretBox(XChaChaKey key)
-        {
-            this.key = key;
-        }
-
         /// <summary>
         /// Encrypts the <paramref name="message"/> and writes computed ciphertext to <paramref name="ciphertext"/>.
         /// </summary>
         /// <param name="message">The message to encrypt.</param>
         /// <param name="ciphertext">The buffer in which to write the ciphertext.</param>
+        /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when encrypting the <paramref name="message"/>.</param>
-        public void Encrypt(ReadOnlySpan<byte> message, Span<byte> ciphertext, XChaChaNonce nonce)
+        public void Encrypt(ReadOnlySpan<byte> message, Span<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce)
         {
             ValidateEncryptParameters(message, ciphertext, nonce);
 
@@ -37,20 +27,21 @@ namespace XChaChaDotNet
                 in MemoryMarshal.GetReference(message),
                 (UInt64)message.Length,
                 in nonce.Handle,
-                this.key.Handle);
+                key.Handle);
         }
 
         /// <summary>
         /// Encrypts the <paramref name="message"/> and returns the computed ciphertext.
         /// </summary>
         /// <param name="message">The message to encrypt.</param>
+        /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when encrypting the <paramref name="message"/>.</param>
         /// <returns>The computed ciphertext.</returns>
-        public Span<byte> Encrypt(ReadOnlySpan<byte> message, XChaChaNonce nonce)
+        public Span<byte> Encrypt(ReadOnlySpan<byte> message, XChaChaKey key, XChaChaNonce nonce)
         {
             var cipherTextLength = GetCipherTextLength(message.Length);
             var cipherText = new byte[cipherTextLength];
-            this.Encrypt(message, cipherText, nonce);
+            this.Encrypt(message, cipherText, key, nonce);
             return cipherText;
         }
 
@@ -60,11 +51,12 @@ namespace XChaChaDotNet
         /// </summary>
         /// <param name="ciphertext">The ciphertext to decrypt.</param>
         /// <param name="message">The buffer in which to write the decrypted message.</param>
+        /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
-        public void Decrypt(ReadOnlySpan<byte> ciphertext, Span<byte> message, XChaChaNonce nonce)
+        public void Decrypt(ReadOnlySpan<byte> ciphertext, Span<byte> message, XChaChaKey key, XChaChaNonce nonce)
         {
             ValidateDecryptParameters(ciphertext, message, nonce);
-            var success = this.InternalDecrypt(ciphertext, message, nonce);
+            var success = this.InternalDecrypt(ciphertext, message, key, nonce);
             if (!success) throw new CryptographicException("decryption failed");
         }
 
@@ -73,13 +65,14 @@ namespace XChaChaDotNet
         /// returns the decrypted message.
         /// </summary>
         /// <param name="ciphertext">The ciphertext to decrypt.</param>
+        /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
         /// <returns>The decrypted message.</returns>
-        public Span<byte> Decrypt(ReadOnlySpan<byte> ciphertext, XChaChaNonce nonce)
+        public Span<byte> Decrypt(ReadOnlySpan<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce)
         {
             var messageLength = GetPlaintextLength(ciphertext.Length);
             var message = new byte[messageLength];
-            this.Decrypt(ciphertext, message, nonce);
+            this.Decrypt(ciphertext, message, key, nonce);
             return message;
         }
 
@@ -89,13 +82,14 @@ namespace XChaChaDotNet
         /// </summary>
         /// <param name="ciphertext">The ciphertext to decrypt.</param>
         /// <param name="message">The buffer in which to write the decrypted message.</param>
+        /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
         /// <returns>Whether the decryption succeeded.</returns>
-        public bool TryDecrypt(ReadOnlySpan<byte> ciphertext, Span<byte> message, XChaChaNonce nonce)
+        public bool TryDecrypt(ReadOnlySpan<byte> ciphertext, Span<byte> message, XChaChaKey key, XChaChaNonce nonce)
         {
             try
             {
-                return this.InternalDecrypt(ciphertext, message, nonce);
+                return this.InternalDecrypt(ciphertext, message, key, nonce);
             }
             catch
             {
@@ -141,14 +135,14 @@ namespace XChaChaDotNet
                 throw new ArgumentException($"{nameof(nonce)} is empty");
         }
 
-        private bool InternalDecrypt(ReadOnlySpan<byte> ciphertext, Span<byte> message, XChaChaNonce nonce)
+        private bool InternalDecrypt(ReadOnlySpan<byte> ciphertext, Span<byte> message, XChaChaKey key, XChaChaNonce nonce)
         {
             var returnCode = crypto_secretbox_xchacha20poly1305_open_easy(
                 ref MemoryMarshal.GetReference(message),
                 in MemoryMarshal.GetReference(ciphertext),
                 (UInt64)ciphertext.Length,
                 in nonce.Handle,
-                this.key.Handle);
+                key.Handle);
 
             return returnCode == 0;
         }

@@ -20,32 +20,32 @@ namespace XChaChaDotNet.Benchmarks
         public void GlobalSetup()
         {
             this.data = new byte[this.DataLengthKb * 1024];
-            this.encryptedData = new byte[XChaChaSecretBox.GetCipherTextLength(this.data.Length)];
-            this.decryptOutputBuffer = new byte[XChaChaSecretBox.GetCipherTextLength(this.data.Length)];
+            this.encryptedData = new byte[XChaChaSecretBoxCipher.GetCipherTextLength(this.data.Length)];
+            this.decryptOutputBuffer = new byte[XChaChaSecretBoxCipher.GetCipherTextLength(this.data.Length)];
             new Random(31).NextBytes(data);
             this.key = XChaChaKey.Generate();
 
             var nonce = XChaChaNonce.Generate();
             this.nonce = nonce.ReadOnlySpan.ToArray();
 
-            var secretBox = new XChaChaSecretBox(this.key);
-            secretBox.Encrypt(data, this.encryptedData, nonce);
+            var secretBox = new XChaChaSecretBoxCipher();
+            secretBox.Encrypt(data, this.encryptedData, this.key, nonce);
         }
 
         [Benchmark]
         public void Encrypt()
         {
             var nonce = new XChaChaNonce(this.nonce);
-            var secretBox = new XChaChaSecretBox(this.key);
-            secretBox.Encrypt(data, this.encryptedData, nonce);
+            var secretBox = new XChaChaSecretBoxCipher();
+            secretBox.Encrypt(data, this.encryptedData, this.key, nonce);
         }
 
         [Benchmark]
         public void Decrypt()
         {
             var nonce = new XChaChaNonce(this.nonce);
-            var secretBox = new XChaChaSecretBox(this.key);
-            secretBox.Decrypt(this.encryptedData, this.decryptOutputBuffer, nonce);
+            var secretBox = new XChaChaSecretBoxCipher();
+            secretBox.Decrypt(this.encryptedData, this.decryptOutputBuffer, this.key, nonce);
         }
 
         [GlobalCleanup]
