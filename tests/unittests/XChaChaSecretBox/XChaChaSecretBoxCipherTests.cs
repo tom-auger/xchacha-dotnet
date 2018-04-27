@@ -6,7 +6,7 @@ namespace XChaChaDotNet
     using XChaChaDotNet.UnitTests;
     using Xunit;
 
-    public class XChaChaSecretBoxTests
+    public class XChaChaSecretBoxCipherTests
     {
         #region Encryption
         [Fact]
