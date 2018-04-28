@@ -6,8 +6,8 @@
     using static SodiumInterop;
 
     /// <summary>
-    /// Represents an XChaCha secret box. Recommended for encrypting a single message
-    /// with a key and nonce to keep it confidential.
+    /// Represents the xchacha_secret_box construction. This is based on the NaCl crypto_secretbox_xsalsa20poly1305 
+    /// construction but uses xchacha rather than xsalsa.
     /// </summary>
     public class XChaChaSecretBoxCipher : IXChaChaSecretBoxCipher
     {
@@ -21,7 +21,6 @@
         public void Encrypt(ReadOnlySpan<byte> message, Span<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce)
         {
             ValidateEncryptParameters(message, ciphertext, nonce);
-
             crypto_secretbox_xchacha20poly1305_easy(
                 ref MemoryMarshal.GetReference(ciphertext),
                 in MemoryMarshal.GetReference(message),

@@ -6,8 +6,7 @@ namespace XChaChaDotNet
     using static SodiumInterop;
 
     /// <summary>
-    /// Represents an XChaCha AEAD cipher. Recommended for encrypting a single message
-    /// with a key and nonce to keep it confidential.
+    /// Represents an XChaCha AEAD cipher based on the IETF specification of ChaCha20Poly1305, but with a 192 bit nonce.
     /// </summary>
     public class XChaChaAeadCipher : IXChaChaAeadCipher
     {
@@ -27,6 +26,7 @@ namespace XChaChaDotNet
             XChaChaNonce nonce)
         {
             ValidateEncryptParameters(message, ciphertext, nonce);
+            // nsec is always null for the XChaCha AEAD construction, here we pass IntPtr.Zero.
             crypto_aead_xchacha20poly1305_ietf_encrypt(
                 ref MemoryMarshal.GetReference(ciphertext),
                 out var ciphertextLongLength,
@@ -207,6 +207,7 @@ namespace XChaChaDotNet
             XChaChaKey key,
             XChaChaNonce nonce)
         {
+            // nsec is always null for the XChaCha AEAD construction, here we pass IntPtr.Zero.
             var result = crypto_aead_xchacha20poly1305_ietf_decrypt(
                 ref MemoryMarshal.GetReference(message),
                 out var messageLength,

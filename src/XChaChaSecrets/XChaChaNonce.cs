@@ -9,6 +9,8 @@ namespace XChaChaDotNet
     /// </summary>
     public readonly ref struct XChaChaNonce
     {
+        // All the XChaCha constructions in this library use a 24 byte nonce.
+        private const int NonceLengthBytes = 24;
         private readonly ReadOnlySpan<byte> bytes;
 
         /// <summary>
@@ -17,7 +19,7 @@ namespace XChaChaDotNet
         /// <param name="nonceBytes">The raw nonce bytes.</param>
         public XChaChaNonce(ReadOnlySpan<byte> nonceBytes)
         {
-            if (nonceBytes.Length != crypto_secretbox_xchacha20poly1305_NONCEBYTES)
+            if (nonceBytes.Length != NonceLengthBytes)
                 throw new ArgumentException($"{nameof(nonceBytes)} has incorrect length");
 
             this.bytes = nonceBytes;
@@ -40,10 +42,10 @@ namespace XChaChaDotNet
         {
             Sodium.Initialize();
 
-            Span<byte> nonceBytes = new byte[crypto_secretbox_xchacha20poly1305_NONCEBYTES];
+            Span<byte> nonceBytes = new byte[NonceLengthBytes];
             randombytes_buf(
                 ref MemoryMarshal.GetReference(nonceBytes),
-                (UIntPtr)crypto_secretbox_xchacha20poly1305_NONCEBYTES);
+                (UIntPtr)NonceLengthBytes);
 
             return new XChaChaNonce(nonceBytes);
         }

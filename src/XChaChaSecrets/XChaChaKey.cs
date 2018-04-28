@@ -9,6 +9,8 @@ namespace XChaChaDotNet
     /// </summary>
     public sealed class XChaChaKey : IDisposable
     {
+        // All the XChaCha constructions in this library use a 32 byte key.
+        private const int KeyLengthBytes = 32;
         private readonly GuardedMemoryHandle handle;
         
         private bool disposed;
@@ -21,10 +23,10 @@ namespace XChaChaDotNet
         {
             Sodium.Initialize();
 
-            if (key.Length != crypto_secretstream_xchacha20poly1305_KEYBYTES)
+            if (key.Length != KeyLengthBytes)
                 throw new ArgumentException("key has invalid length", nameof(key));
 
-            GuardedMemoryHandle.Alloc(crypto_secretstream_xchacha20poly1305_KEYBYTES, out this.handle);
+            GuardedMemoryHandle.Alloc(KeyLengthBytes, out this.handle);
             this.handle.Write(key);
             this.handle.MakeReadOnly();
         }
@@ -41,7 +43,7 @@ namespace XChaChaDotNet
         public static XChaChaKey Generate()
         {
             Sodium.Initialize();
-            GuardedMemoryHandle.Alloc(crypto_secretstream_xchacha20poly1305_KEYBYTES, out var handle);
+            GuardedMemoryHandle.Alloc(KeyLengthBytes, out var handle);
             var keySpan = handle.DangerousGetSpan();
             crypto_secretstream_xchacha20poly1305_keygen(ref MemoryMarshal.GetReference(keySpan));
             handle.MakeReadOnly();

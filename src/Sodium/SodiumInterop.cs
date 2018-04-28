@@ -104,8 +104,13 @@
         #endregion
 
         #region XChaCha20Poly1305Aead
+        public const int crypto_aead_xchacha20poly1305_ietf_KEYBYTES = 32;
+        // The XChaCha AEAD construction doesn't require a secret nonce, hence
+        // has length 0.
+        public const int crypto_aead_xchacha20poly1305_ietf_NSECBYTES = 0;
+        public const int crypto_aead_xchacha20poly1305_ietf_NPUBBYTES = 24;
         public const int crypto_aead_xchacha20poly1305_ietf_ABYTES = 16;
-
+        
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int crypto_aead_xchacha20poly1305_ietf_encrypt(
             ref byte c,
