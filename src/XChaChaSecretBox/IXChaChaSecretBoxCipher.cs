@@ -1,9 +1,9 @@
-using System;
-
 namespace XChaChaDotNet
 {
+    using System;
+
     /// <summary>
-    /// Represents an XChaCha cipher.
+    /// Represents an XChaCha secret box cipher.
     /// </summary>
     public interface IXChaChaSecretBoxCipher
     {

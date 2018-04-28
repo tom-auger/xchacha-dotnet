@@ -103,6 +103,34 @@
             GuardedMemoryHandle k);
         #endregion
 
+        #region XChaCha20Poly1305Aead
+        public const int crypto_aead_xchacha20poly1305_ietf_ABYTES = 16;
+
+        [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int crypto_aead_xchacha20poly1305_ietf_encrypt(
+            ref byte c,
+            out UInt64 clen_p,
+            in byte m,
+            UInt64 mlen,
+            in byte ad,
+            UInt64 adlen,
+            IntPtr nsec,
+            in byte npub,
+            GuardedMemoryHandle k);
+
+        [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int crypto_aead_xchacha20poly1305_ietf_decrypt(
+            ref byte m,
+            out UInt64 mlen_p,
+            IntPtr nsec,
+            in byte c,
+            UInt64 clen,
+            in byte ad,
+            UInt64 adlen,
+            in byte npub,
+            GuardedMemoryHandle k);
+        #endregion
+
         #region GuardedMemory
         [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
         public static extern GuardedMemoryHandle sodium_malloc(UIntPtr size);
