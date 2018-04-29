@@ -33,7 +33,7 @@ namespace XChaChaDotNet.UnitTests
             var nonceBytes = RandomBytesGenerator.NextBytes(NonceLength).ToArray();
             var nonce = new XChaChaNonce(nonceBytes);
 
-            Assert.Equal(nonce.ReadOnlySpan.ToArray(), nonceBytes);
+            Assert.Equal(nonce.ToArray(), nonceBytes);
         }
     }
 }

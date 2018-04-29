@@ -26,18 +26,22 @@ namespace XChaChaDotNet
         }
 
         /// <summary>
-        /// Returns the raw nonce bytes.
+        /// Returns a ReadOnlySpan to the raw nonce bytes.
         /// </summary>
         public ReadOnlySpan<byte> ReadOnlySpan => this.bytes;
+
+        /// <summary>
+        /// Returns the raw nonce bytes.
+        /// </summary>
+        public byte[] ToArray() => this.bytes.ToArray();
 
         internal ref byte Handle => ref MemoryMarshal.GetReference(this.bytes);
 
         internal bool IsEmpty => this.bytes == ReadOnlySpan<byte>.Empty;
 
         /// <summary>
-        /// Creates an instance with a new randomly generated nonce.
+        /// Create a new randomly generated nonce.
         /// </summary>
-        /// <returns>An instance with a new randomly generated nonce.</returns>
         public static XChaChaNonce Generate()
         {
             Sodium.Initialize();

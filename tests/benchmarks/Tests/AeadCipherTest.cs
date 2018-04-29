@@ -24,7 +24,7 @@ namespace XChaChaDotNet.Benchmarks
             this.key = XChaChaKey.Generate();
 
             var nonce = XChaChaNonce.Generate();
-            this.nonce = nonce.ReadOnlySpan.ToArray();
+            this.nonce = nonce.ToArray();
 
             var aeadCipher = new XChaChaAeadCipher();
             this.encryptedData = new byte[aeadCipher.GetCipherTextLength(this.data.Length)];
