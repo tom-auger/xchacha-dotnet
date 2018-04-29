@@ -13,7 +13,7 @@
                     typeof(StreamEncryptionTest),
                     typeof(StreamDecryptionTest),
                     typeof(StreamBufferSizeTest),
-                    typeof(SecretBoxTest)
+                    typeof(SecretBoxCipherTest)
                 });
 
             switcher.Run(args);

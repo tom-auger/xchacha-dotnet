@@ -5,7 +5,7 @@ namespace XChaChaDotNet.Benchmarks
     using System.IO;
     using XChaChaDotNet;
 
-    public class SecretBoxTest
+    public class SecretBoxCipherTest
     {
         private XChaChaKey key;
         private byte[] nonce;
