@@ -10,6 +10,23 @@ namespace XChaChaDotNet
     public class XChaChaAeadCipherTests
     {
         #region Encryption
+        [Fact]
+        public void Test_Encrypt_WithAssociatedData_ProducesNonZeroOutput()
+        {
+           using (var key = XChaChaKey.Generate())
+            {
+                var aeadCipher = new XChaChaAeadCipher();
+                var nonce = XChaChaNonce.Generate();
+                var associatedData = Encoding.UTF8.GetBytes(DateTime.Now.ToString());
+
+                var message = RandomBytesGenerator.NextBytes(1024 * 1024);
+                var ciphertext = new byte[aeadCipher.GetCipherTextLength(message.Length)];
+
+                aeadCipher.Encrypt(message, ciphertext, key, nonce, associatedData);
+
+                Assert.False(ciphertext.All(b => b == 0));
+            }
+        }
         #endregion
 
         #region Decryption
@@ -20,7 +37,7 @@ namespace XChaChaDotNet
             {
                 var aeadCipher = new XChaChaAeadCipher();
                 var nonce = XChaChaNonce.Generate();
-                ReadOnlySpan<byte> associatedData = Encoding.UTF8.GetBytes(DateTime.Now.ToString());
+                var associatedData = Encoding.UTF8.GetBytes(DateTime.Now.ToString());
 
                 const int messageLength = 1024 * 1024;
                 var message = RandomBytesGenerator.NextBytes(messageLength);
