@@ -17,15 +17,15 @@ namespace XChaChaDotNet
         /// <param name="ciphertext">The buffer in which to write the ciphertext.</param>
         /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when encrypting the <paramref name="message"/>.</param>
-        /// <param name="associatedData">The associated data to use for computing the authentication tag.</param>
+        /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         public void Encrypt(
             ReadOnlySpan<byte> message,
             Span<byte> ciphertext,
             XChaChaKey key,
             XChaChaNonce nonce,
-            ReadOnlySpan<byte> associatedData)
+            ReadOnlySpan<byte> additionalData)
         {
-            InternalEncrypt(message, ciphertext, key, nonce, associatedData);
+            InternalEncrypt(message, ciphertext, key, nonce, additionalData);
         }
 
         /// <summary>
@@ -34,13 +34,13 @@ namespace XChaChaDotNet
         /// <param name="message">The message to encrypt.</param>
         /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when encrypting the <paramref name="message"/>.</param>
-        /// <param name="associatedData">The associated data to use for computing the authentication tag.</param>
+        /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         /// <returns>The computed ciphertext.</returns>
-        public Span<byte> Encrypt(ReadOnlySpan<byte> message, XChaChaKey key, XChaChaNonce nonce, ReadOnlySpan<byte> associatedData)
+        public Span<byte> Encrypt(ReadOnlySpan<byte> message, XChaChaKey key, XChaChaNonce nonce, ReadOnlySpan<byte> additionalData)
         {
             var cipherTextLength = GetCipherTextLength(message.Length);
             var cipherText = new byte[cipherTextLength];
-            this.Encrypt(message, cipherText, key, nonce, associatedData);
+            this.Encrypt(message, cipherText, key, nonce, additionalData);
             return cipherText;
         }
 
@@ -52,15 +52,15 @@ namespace XChaChaDotNet
         /// <param name="message">The buffer in which to write the decrypted message.</param>
         /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
-        /// <param name="associatedData">The associated data to use for computing the authentication tag.</param>
+        /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         public void Decrypt(
             ReadOnlySpan<byte> ciphertext,
             Span<byte> message,
             XChaChaKey key,
             XChaChaNonce nonce,
-            ReadOnlySpan<byte> associatedData)
+            ReadOnlySpan<byte> additionalData)
         {
-            this.InternalDecrypt(ciphertext, message, key, nonce, associatedData);
+            this.InternalDecrypt(ciphertext, message, key, nonce, additionalData);
         }
 
         /// <summary>
@@ -70,13 +70,13 @@ namespace XChaChaDotNet
         /// <param name="ciphertext">The ciphertext to decrypt.</param>
         /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
-        /// <param name="associatedData">The associated data to use for computing the authentication tag.</param>
+        /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         /// <returns>The decrypted message.</returns>
-        public Span<byte> Decrypt(ReadOnlySpan<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce, ReadOnlySpan<byte> associatedData)
+        public Span<byte> Decrypt(ReadOnlySpan<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce, ReadOnlySpan<byte> additionalData)
         {
             var messageLength = GetPlaintextLength(ciphertext.Length);
             var message = new byte[messageLength];
-            this.Decrypt(ciphertext, message, key, nonce, associatedData);
+            this.Decrypt(ciphertext, message, key, nonce, additionalData);
             return message;
         }
 
@@ -88,18 +88,18 @@ namespace XChaChaDotNet
         /// <param name="message">The buffer in which to write the decrypted message.</param>
         /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
-        /// <param name="associatedData">The associated data to use for computing the authentication tag.</param>
+        /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         /// <returns>Whether the decryption succeeded.</returns>
         public bool TryDecrypt(
             ReadOnlySpan<byte> ciphertext,
             Span<byte> message,
             XChaChaKey key,
             XChaChaNonce nonce,
-            ReadOnlySpan<byte> associatedData)
+            ReadOnlySpan<byte> additionalData)
         {
             try
             {
-                this.InternalDecrypt(ciphertext, message, key, nonce, associatedData);
+                this.InternalDecrypt(ciphertext, message, key, nonce, additionalData);
                 return true;
             }
             catch
@@ -129,7 +129,7 @@ namespace XChaChaDotNet
             Span<byte> ciphertext,
             XChaChaKey key,
             XChaChaNonce nonce,
-            ReadOnlySpan<byte> associatedData)
+            ReadOnlySpan<byte> additionalData)
         {
             ValidateEncryptParameters(message, ciphertext, nonce);
             // nsec is always null for the XChaCha AEAD construction, here we pass IntPtr.Zero.
@@ -138,8 +138,8 @@ namespace XChaChaDotNet
                 out var ciphertextLongLength,
                 in MemoryMarshal.GetReference(message),
                 (UInt64)message.Length,
-                in MemoryMarshal.GetReference(associatedData),
-                (UInt64)associatedData.Length,
+                in MemoryMarshal.GetReference(additionalData),
+                (UInt64)additionalData.Length,
                 IntPtr.Zero,
                 in nonce.Handle,
                 key.Handle);
@@ -150,7 +150,7 @@ namespace XChaChaDotNet
             Span<byte> message,
             XChaChaKey key,
             XChaChaNonce nonce,
-            ReadOnlySpan<byte> associatedData)
+            ReadOnlySpan<byte> additionalData)
         {
             ValidateDecryptParameters(ciphertext, message, nonce);
             // nsec is always null for the XChaCha AEAD construction, here we pass IntPtr.Zero.
@@ -160,8 +160,8 @@ namespace XChaChaDotNet
                 IntPtr.Zero,
                 in MemoryMarshal.GetReference(ciphertext),
                 (UInt64)ciphertext.Length,
-                in MemoryMarshal.GetReference(associatedData),
-                (UInt64)associatedData.Length,
+                in MemoryMarshal.GetReference(additionalData),
+                (UInt64)additionalData.Length,
                 in nonce.Handle,
                 key.Handle);
 

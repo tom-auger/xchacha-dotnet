@@ -11,18 +11,18 @@ namespace XChaChaDotNet
     {
         #region Encryption
         [Fact]
-        public void Test_Encrypt_WithAssociatedData_ProducesNonZeroOutput()
+        public void Test_Encrypt_WithAdditionalData_ProducesNonZeroOutput()
         {
            using (var key = XChaChaKey.Generate())
             {
                 var aeadCipher = new XChaChaAeadCipher();
                 var nonce = XChaChaNonce.Generate();
-                var associatedData = Encoding.UTF8.GetBytes(DateTime.Now.ToString());
+                var additionalData = Encoding.UTF8.GetBytes(DateTime.Now.ToString());
 
                 var message = RandomBytesGenerator.NextBytes(1024 * 1024);
                 var ciphertext = new byte[aeadCipher.GetCipherTextLength(message.Length)];
 
-                aeadCipher.Encrypt(message, ciphertext, key, nonce, associatedData);
+                aeadCipher.Encrypt(message, ciphertext, key, nonce, additionalData);
 
                 Assert.False(ciphertext.All(b => b == 0));
             }
@@ -31,19 +31,19 @@ namespace XChaChaDotNet
 
         #region Decryption
         [Fact]
-        public void Test_Decrypt_WithAssociatedData()
+        public void Test_Decrypt_WithAdditionalData()
         {
             using (var key = XChaChaKey.Generate())
             {
                 var aeadCipher = new XChaChaAeadCipher();
                 var nonce = XChaChaNonce.Generate();
-                var associatedData = Encoding.UTF8.GetBytes(DateTime.Now.ToString());
+                var additionalData = Encoding.UTF8.GetBytes(DateTime.Now.ToString());
 
                 const int messageLength = 1024 * 1024;
                 var message = RandomBytesGenerator.NextBytes(messageLength);
-                var ciphertext = aeadCipher.Encrypt(message, key, nonce, associatedData);
+                var ciphertext = aeadCipher.Encrypt(message, key, nonce, additionalData);
 
-                var result = aeadCipher.Decrypt(ciphertext, key, nonce, associatedData);
+                var result = aeadCipher.Decrypt(ciphertext, key, nonce, additionalData);
                 Assert.Equal(message.ToArray(), result.ToArray());
             }
         }

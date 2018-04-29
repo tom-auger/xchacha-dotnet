@@ -14,13 +14,13 @@ namespace XChaChaDotNet
         /// <param name="ciphertext">The buffer in which to write the ciphertext.</param>
         /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when encrypting the <paramref name="message"/>.</param>
-        /// <param name="associatedData">The associated data to use for computing the authentication tag.</param>
+        /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         void Encrypt(
             ReadOnlySpan<byte> message,
             Span<byte> ciphertext,
             XChaChaKey key,
             XChaChaNonce nonce,
-            ReadOnlySpan<byte> associatedData);
+            ReadOnlySpan<byte> additionalData);
 
         /// <summary>
         /// Encrypts the <paramref name="message"/> and returns the computed ciphertext.
@@ -28,9 +28,9 @@ namespace XChaChaDotNet
         /// <param name="message">The message to encrypt.</param>
         /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when encrypting the <paramref name="message"/>.</param>
-        /// <param name="associatedData">The associated data to use for computing the authentication tag.</param>
+        /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         /// <returns>The computed ciphertext.</returns>
-        Span<byte> Encrypt(ReadOnlySpan<byte> message, XChaChaKey key, XChaChaNonce nonce, ReadOnlySpan<byte> associatedData);
+        Span<byte> Encrypt(ReadOnlySpan<byte> message, XChaChaKey key, XChaChaNonce nonce, ReadOnlySpan<byte> additionalData);
 
         /// <summary>
         /// Decrypts the <paramref name="ciphertext"/>, verifies the authenticaion tag, and if successful,
@@ -40,13 +40,13 @@ namespace XChaChaDotNet
         /// <param name="message">The buffer in which to write the decrypted message.</param>
         /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
-        /// <param name="associatedData">The associated data to use for computing the authentication tag.</param>
+        /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         void Decrypt(
             ReadOnlySpan<byte> ciphertext,
             Span<byte> message,
             XChaChaKey key,
             XChaChaNonce nonce,
-            ReadOnlySpan<byte> associatedData);
+            ReadOnlySpan<byte> additionalData);
 
         /// <summary>
         /// Decrypts the <paramref name="ciphertext"/>, verifies the authenticaion tag, and if successful,
@@ -55,9 +55,9 @@ namespace XChaChaDotNet
         /// <param name="ciphertext">The ciphertext to decrypt.</param>
         /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
-        /// <param name="associatedData">The associated data to use for computing the authentication tag.</param>
+        /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         /// <returns>The decrypted message.</returns>
-        Span<byte> Decrypt(ReadOnlySpan<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce, ReadOnlySpan<byte> associatedData);
+        Span<byte> Decrypt(ReadOnlySpan<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce, ReadOnlySpan<byte> additionalData);
 
         /// <summary>
         /// Tries to decrypt the <paramref name="ciphertext"/>, verifies the authenticaion tag, and if successful,
@@ -67,13 +67,13 @@ namespace XChaChaDotNet
         /// <param name="message">The buffer in which to write the decrypted message.</param>
         /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
-        /// <param name="associatedData">The associated data to use for computing the authentication tag.</param>
+        /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         /// <returns>Whether the decryption succeeded.</returns>
         bool TryDecrypt(
             ReadOnlySpan<byte> ciphertext,
             Span<byte> message,
             XChaChaKey key,
             XChaChaNonce nonce,
-            ReadOnlySpan<byte> associatedData);
+            ReadOnlySpan<byte> additionalData);
     }
 }
