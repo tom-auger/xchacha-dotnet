@@ -19,7 +19,7 @@ namespace XChaChaDotNet
                 var nonce = XChaChaNonce.Generate();
 
                 var message = RandomBytesGenerator.NextBytes(1024 * 1024);
-                var ciphertext = new byte[XChaChaAeadCipher.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[aeadCipher.GetCipherTextLength(message.Length)];
 
                 aeadCipher.Encrypt(message, ciphertext, key, nonce);
 
@@ -35,7 +35,7 @@ namespace XChaChaDotNet
                 var aeadCipher = new XChaChaAeadCipher();
 
                 var message = Array.Empty<byte>();
-                var ciphertext = new byte[XChaChaAeadCipher.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[aeadCipher.GetCipherTextLength(message.Length)];
 
                 Action action = () =>
                     {
@@ -96,7 +96,7 @@ namespace XChaChaDotNet
 
                 const int messageLength = 1024 * 1024;
                 var message = RandomBytesGenerator.NextBytes(messageLength);
-                var ciphertext = new byte[XChaChaAeadCipher.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[aeadCipher.GetCipherTextLength(message.Length)];
 
                 aeadCipher.Encrypt(message, ciphertext, key, nonce);
 
@@ -134,9 +134,8 @@ namespace XChaChaDotNet
             using (var key = XChaChaKey.Generate())
             {
                 var aeadCipher = new XChaChaAeadCipher();
-
                 var message = Array.Empty<byte>();
-                var ciphertext = new byte[XChaChaAeadCipher.GetCipherTextLength(1)];
+                var ciphertext = new byte[aeadCipher.GetCipherTextLength(1)];
 
                 Action action = () =>
                     {
@@ -159,7 +158,7 @@ namespace XChaChaDotNet
 
                 const int messageLength = 1024 * 1024;
                 var message = RandomBytesGenerator.NextBytes(messageLength);
-                var ciphertext = new byte[XChaChaAeadCipher.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[aeadCipher.GetCipherTextLength(message.Length)];
 
                 aeadCipher.Encrypt(message, ciphertext, key, nonce);
 
@@ -179,7 +178,7 @@ namespace XChaChaDotNet
 
                 const int messageLength = 1024 * 1024;
                 var message = RandomBytesGenerator.NextBytes(messageLength);
-                var ciphertext = new byte[XChaChaAeadCipher.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[aeadCipher.GetCipherTextLength(message.Length)];
 
                 aeadCipher.Encrypt(message, ciphertext, key, nonce);
 
@@ -203,7 +202,7 @@ namespace XChaChaDotNet
 
                 const int messageLength = 1024 * 1024;
                 var message = RandomBytesGenerator.NextBytes(messageLength);
-                var ciphertext = new byte[XChaChaAeadCipher.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[aeadCipher.GetCipherTextLength(message.Length)];
 
                 aeadCipher.Encrypt(message, ciphertext, key, nonce);
 
@@ -241,9 +240,9 @@ namespace XChaChaDotNet
 
                 const int messageLength = 1024 * 1024;
                 var message = RandomBytesGenerator.NextBytes(messageLength);
-                var ciphertext = aeadCipher.Encrypt(message, associatedData, key, nonce);
+                var ciphertext = aeadCipher.Encrypt(message, key, nonce, associatedData);
 
-                var result = aeadCipher.Decrypt(ciphertext, associatedData, key, nonce);
+                var result = aeadCipher.Decrypt(ciphertext, key, nonce, associatedData);
                 Assert.Equal(message.ToArray(), result.ToArray());
             }
         }
@@ -256,7 +255,8 @@ namespace XChaChaDotNet
         [InlineData(1024, 1008)]
         public void Test_GetPlaintextLength_ReturnsCorrectLength(int ciphertextLength, int expectedPlaintextLength)
         {
-            var plaintextLength = XChaChaAeadCipher.GetPlaintextLength(ciphertextLength);
+            var aeadCipher = new XChaChaAeadCipher();
+            var plaintextLength = aeadCipher.GetPlaintextLength(ciphertextLength);
             Assert.Equal(expectedPlaintextLength, plaintextLength);
         }
     }
