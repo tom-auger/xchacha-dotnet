@@ -6,7 +6,7 @@ namespace XChaChaDotNet
     using static SodiumInterop;
 
     /// <summary>
-    /// Represents an XChaCha AEAD cipher based on the IETF specification of ChaCha20Poly1305, but with a 192 bit nonce.
+    /// Represents an XChaCha AEAD cipher based on the IETF specification of ChaCha20Poly1305 but with a 192 bit nonce.
     /// </summary>
     public class XChaChaAeadCipher : XChaChaSecretKeyCipher, IXChaChaAeadCipher
     {

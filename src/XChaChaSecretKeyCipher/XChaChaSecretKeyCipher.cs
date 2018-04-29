@@ -1,11 +1,11 @@
 namespace XChaChaDotNet
 {
     using System;
-    
+
     /// <summary>
-    /// Represents an XChaCha cipher that uses a single key to encrypt and decrypt message.
+    /// Represents an XChaCha cipher that uses a single secret key to encrypt and decrypt a message.
     /// </summary>
-    public abstract class XChaChaSecretKeyCipher
+    public abstract class XChaChaSecretKeyCipher : IXChaChaSecretKeyCipher
     {
         /// <summary>
         /// Calculates the size of the ciphertext for a given plaintext length.
