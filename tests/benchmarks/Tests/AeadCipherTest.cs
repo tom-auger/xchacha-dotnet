@@ -5,7 +5,7 @@ namespace XChaChaDotNet.Benchmarks
     using System.IO;
     using XChaChaDotNet;
 
-    public class SecretBoxCipherTest
+    public class AeadCipherTest
     {
         private XChaChaKey key;
         private byte[] nonce;
@@ -26,26 +26,26 @@ namespace XChaChaDotNet.Benchmarks
             var nonce = XChaChaNonce.Generate();
             this.nonce = nonce.ReadOnlySpan.ToArray();
 
-            var secretBoxCipher = new XChaChaSecretBoxCipher();
-            this.encryptedData = new byte[secretBoxCipher.GetCipherTextLength(this.data.Length)];
-            this.decryptOutputBuffer = new byte[secretBoxCipher.GetCipherTextLength(this.data.Length)];
-            secretBoxCipher.Encrypt(data, this.encryptedData, this.key, nonce);
+            var aeadCipher = new XChaChaAeadCipher();
+            this.encryptedData = new byte[aeadCipher.GetCipherTextLength(this.data.Length)];
+            this.decryptOutputBuffer = new byte[aeadCipher.GetCipherTextLength(this.data.Length)];
+            aeadCipher.Encrypt(data, this.encryptedData, this.key, nonce);
         }
 
         [Benchmark]
         public void Encrypt()
         {
             var nonce = new XChaChaNonce(this.nonce);
-            var secretBoxCipher = new XChaChaSecretBoxCipher();
-            secretBoxCipher.Encrypt(data, this.encryptedData, this.key, nonce);
+            var aeadCipher = new XChaChaAeadCipher();
+            aeadCipher.Encrypt(data, this.encryptedData, this.key, nonce);
         }
 
         [Benchmark]
         public void Decrypt()
         {
             var nonce = new XChaChaNonce(this.nonce);
-            var secretBoxCipher = new XChaChaSecretBoxCipher();
-            secretBoxCipher.Decrypt(this.encryptedData, this.decryptOutputBuffer, this.key, nonce);
+            var aeadCipher = new XChaChaAeadCipher();
+            aeadCipher.Decrypt(this.encryptedData, this.decryptOutputBuffer, this.key, nonce);
         }
 
         [GlobalCleanup]
