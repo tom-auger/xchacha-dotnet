@@ -20,8 +20,6 @@ namespace XChaChaDotNet.Benchmarks
         public void GlobalSetup()
         {
             this.data = new byte[this.DataLengthKb * 1024];
-            this.encryptedData = new byte[XChaChaSecretBoxCipher.GetCipherTextLength(this.data.Length)];
-            this.decryptOutputBuffer = new byte[XChaChaSecretBoxCipher.GetCipherTextLength(this.data.Length)];
             new Random(31).NextBytes(data);
             this.key = XChaChaKey.Generate();
 
@@ -29,6 +27,8 @@ namespace XChaChaDotNet.Benchmarks
             this.nonce = nonce.ReadOnlySpan.ToArray();
 
             var secretBox = new XChaChaSecretBoxCipher();
+            this.encryptedData = new byte[secretBox.GetCipherTextLength(this.data.Length)];
+            this.decryptOutputBuffer = new byte[secretBox.GetCipherTextLength(this.data.Length)];
             secretBox.Encrypt(data, this.encryptedData, this.key, nonce);
         }
 

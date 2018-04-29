@@ -18,7 +18,7 @@ namespace XChaChaDotNet
                 var nonce = XChaChaNonce.Generate();
 
                 var message = RandomBytesGenerator.NextBytes(1024 * 1024);
-                var ciphertext = new byte[XChaChaSecretBoxCipher.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[secretBox.GetCipherTextLength(message.Length)];
 
                 secretBox.Encrypt(message, ciphertext, key, nonce);
 
@@ -34,7 +34,7 @@ namespace XChaChaDotNet
                 var secretBox = new XChaChaSecretBoxCipher();
 
                 var message = Array.Empty<byte>();
-                var ciphertext = new byte[XChaChaSecretBoxCipher.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[secretBox.GetCipherTextLength(message.Length)];
 
                 Action action = () =>
                     {
@@ -95,7 +95,7 @@ namespace XChaChaDotNet
 
                 const int messageLength = 1024 * 1024;
                 var message = RandomBytesGenerator.NextBytes(messageLength);
-                var ciphertext = new byte[XChaChaSecretBoxCipher.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[secretBox.GetCipherTextLength(message.Length)];
 
                 secretBox.Encrypt(message, ciphertext, key, nonce);
 
@@ -135,7 +135,7 @@ namespace XChaChaDotNet
                 var secretBox = new XChaChaSecretBoxCipher();
 
                 var message = Array.Empty<byte>();
-                var ciphertext = new byte[XChaChaSecretBoxCipher.GetCipherTextLength(1)];
+                var ciphertext = new byte[secretBox.GetCipherTextLength(1)];
 
                 Action action = () =>
                     {
@@ -158,7 +158,7 @@ namespace XChaChaDotNet
 
                 const int messageLength = 1024 * 1024;
                 var message = RandomBytesGenerator.NextBytes(messageLength);
-                var ciphertext = new byte[XChaChaSecretBoxCipher.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[secretBox.GetCipherTextLength(message.Length)];
 
                 secretBox.Encrypt(message, ciphertext, key, nonce);
 
@@ -178,7 +178,7 @@ namespace XChaChaDotNet
 
                 const int messageLength = 1024 * 1024;
                 var message = RandomBytesGenerator.NextBytes(messageLength);
-                var ciphertext = new byte[XChaChaSecretBoxCipher.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[secretBox.GetCipherTextLength(message.Length)];
 
                 secretBox.Encrypt(message, ciphertext, key, nonce);
 
@@ -202,7 +202,7 @@ namespace XChaChaDotNet
 
                 const int messageLength = 1024 * 1024;
                 var message = RandomBytesGenerator.NextBytes(messageLength);
-                var ciphertext = new byte[XChaChaSecretBoxCipher.GetCipherTextLength(message.Length)];
+                var ciphertext = new byte[secretBox.GetCipherTextLength(message.Length)];
 
                 secretBox.Encrypt(message, ciphertext, key, nonce);
 
@@ -236,7 +236,8 @@ namespace XChaChaDotNet
         [InlineData(1024, 1008)]
         public void Test_GetPlaintextLength_ReturnsCorrectLength(int ciphertextLength, int expectedPlaintextLength)
         {
-            var plaintextLength = XChaChaSecretBoxCipher.GetPlaintextLength(ciphertextLength);
+            var secretBox = new XChaChaSecretBoxCipher();
+            var plaintextLength = secretBox.GetPlaintextLength(ciphertextLength);
             Assert.Equal(expectedPlaintextLength, plaintextLength);
         }
         #endregion
