@@ -30,7 +30,7 @@ namespace XChaChaDotNet
         /// <param name="nonce">The nonce to use when encrypting the <paramref name="message"/>.</param>
         /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         /// <returns>The computed ciphertext.</returns>
-        Span<byte> Encrypt(ReadOnlySpan<byte> message, XChaChaKey key, XChaChaNonce nonce, ReadOnlySpan<byte> additionalData);
+        byte[] Encrypt(ReadOnlySpan<byte> message, XChaChaKey key, XChaChaNonce nonce, ReadOnlySpan<byte> additionalData);
 
         /// <summary>
         /// Decrypts the <paramref name="ciphertext"/>, verifies the authenticaion tag, and if successful,
@@ -57,7 +57,7 @@ namespace XChaChaDotNet
         /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
         /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         /// <returns>The decrypted message.</returns>
-        Span<byte> Decrypt(ReadOnlySpan<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce, ReadOnlySpan<byte> additionalData);
+        byte[] Decrypt(ReadOnlySpan<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce, ReadOnlySpan<byte> additionalData);
 
         /// <summary>
         /// Tries to decrypt the <paramref name="ciphertext"/>, verifies the authenticaion tag, and if successful,

@@ -23,7 +23,7 @@ namespace XChaChaDotNet
         /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when encrypting the <paramref name="message"/>.</param>
         /// <returns>The computed ciphertext.</returns>
-        Span<byte> Encrypt(ReadOnlySpan<byte> message, XChaChaKey key, XChaChaNonce nonce);
+        byte[] Encrypt(ReadOnlySpan<byte> message, XChaChaKey key, XChaChaNonce nonce);
         
         /// <summary>
         /// Decrypts the <paramref name="ciphertext"/>, verifies the authenticaion tag, and if successful,
@@ -43,7 +43,7 @@ namespace XChaChaDotNet
         /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
         /// <returns>The decrypted message.</returns>
-        Span<byte> Decrypt(ReadOnlySpan<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce);
+        byte[] Decrypt(ReadOnlySpan<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce);
 
         /// <summary>
         /// Tries to decrypt the <paramref name="ciphertext"/>, verifies the authenticaion tag, and if successful,

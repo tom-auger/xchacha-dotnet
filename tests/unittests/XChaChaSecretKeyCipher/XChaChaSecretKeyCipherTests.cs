@@ -87,7 +87,7 @@ namespace XChaChaDotNet
                 var message = RandomBytesGenerator.NextBytes(1024 * 1024);
                 var ciphertext = cipher.Encrypt(message, key, nonce);
 
-                Assert.False(ciphertext.ToArray().All(b => b == 0));
+                Assert.False(ciphertext.All(b => b == 0));
             }
         }
         #endregion
@@ -111,7 +111,7 @@ namespace XChaChaDotNet
                 var decryptedMessage = new byte[messageLength];
                 var result = cipher.TryDecrypt(ciphertext, decryptedMessage, key, nonce);
                 Assert.True(result);
-                Assert.Equal(message.ToArray(), decryptedMessage);
+                Assert.Equal(message, decryptedMessage);
             }
         }
 
@@ -174,7 +174,7 @@ namespace XChaChaDotNet
 
                 var result = cipher.TryDecrypt(ciphertext, ciphertext, key, nonce);
                 Assert.True(result);
-                Assert.Equal(message.ToArray(), ciphertext.Take(messageLength));
+                Assert.Equal(message, ciphertext.Take(messageLength));
             }
         }
 
@@ -238,7 +238,7 @@ namespace XChaChaDotNet
                 var ciphertext = cipher.Encrypt(message, key, nonce);
 
                 var result = cipher.Decrypt(ciphertext, key, nonce);
-                Assert.Equal(message.ToArray(), result.ToArray());
+                Assert.Equal(message, result);
             }
         }
         #endregion

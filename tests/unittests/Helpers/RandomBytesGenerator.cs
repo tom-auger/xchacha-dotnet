@@ -7,7 +7,7 @@ namespace XChaChaDotNet.UnitTests
         private static readonly Random random = new Random();
         private static readonly object randomLock = new object();
 
-        public static ReadOnlySpan<byte> NextBytes(int length)
+        public static byte[] NextBytes(int length)
         {
             lock (randomLock)
             {

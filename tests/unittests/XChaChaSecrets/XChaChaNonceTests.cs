@@ -19,7 +19,7 @@ namespace XChaChaDotNet.UnitTests
         [InlineData(55)]
         public void Test_InitializeNonce_LengthIncorrect_ThrowsArgumentException(int length)
         {
-            var nonceBytes = RandomBytesGenerator.NextBytes(length).ToArray();
+            var nonceBytes = RandomBytesGenerator.NextBytes(length);
 
             Action action = () => new XChaChaNonce(nonceBytes);
 
@@ -30,7 +30,7 @@ namespace XChaChaDotNet.UnitTests
         [Fact]
         public void Test_InitializeNonce_ExistingNonce_InitializesSuccessfully()
         {
-            var nonceBytes = RandomBytesGenerator.NextBytes(NonceLength).ToArray();
+            var nonceBytes = RandomBytesGenerator.NextBytes(NonceLength);
             var nonce = new XChaChaNonce(nonceBytes);
 
             Assert.Equal(nonce.ToArray(), nonceBytes);

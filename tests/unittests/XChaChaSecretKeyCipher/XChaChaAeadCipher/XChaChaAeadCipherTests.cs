@@ -44,7 +44,7 @@ namespace XChaChaDotNet
                 var ciphertext = aeadCipher.Encrypt(message, key, nonce, additionalData);
 
                 var result = aeadCipher.Decrypt(ciphertext, key, nonce, additionalData);
-                Assert.Equal(message.ToArray(), result.ToArray());
+                Assert.Equal(message, result);
             }
         }
         #endregion

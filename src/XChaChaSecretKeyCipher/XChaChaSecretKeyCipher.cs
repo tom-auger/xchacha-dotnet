@@ -26,7 +26,7 @@ namespace XChaChaDotNet
         /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when encrypting the <paramref name="message"/>.</param>
         /// <returns>The computed ciphertext.</returns>
-        public Span<byte> Encrypt(ReadOnlySpan<byte> message, XChaChaKey key, XChaChaNonce nonce)
+        public byte[] Encrypt(ReadOnlySpan<byte> message, XChaChaKey key, XChaChaNonce nonce)
         {
             this.ValidateMaxMessageLength(message);
             var cipherText = new byte[GetCipherTextLength(message.Length)];
@@ -55,7 +55,7 @@ namespace XChaChaDotNet
         /// <param name="key">The encryption key.</param>
         /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
         /// <returns>The decrypted message.</returns>
-        public Span<byte> Decrypt(ReadOnlySpan<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce)
+        public byte[] Decrypt(ReadOnlySpan<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce)
         {
             var messageLength = GetPlaintextLength(ciphertext.Length);
             var message = new byte[messageLength];
