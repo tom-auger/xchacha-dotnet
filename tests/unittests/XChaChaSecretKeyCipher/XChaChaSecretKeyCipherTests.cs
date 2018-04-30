@@ -242,5 +242,52 @@ namespace XChaChaDotNet
             }
         }
         #endregion
+
+        #region Validation
+        [Theory]
+        [MemberData(nameof(CipherTypes))]
+        public void Test_EncryptWithReturn_MaxMessageLengthExceeded_ThrowsException(Type cipherType)
+        {
+            unsafe
+            {
+                using (var key = XChaChaKey.Generate())
+                {
+                    var cipher = (XChaChaSecretKeyCipher)Activator.CreateInstance(cipherType);
+                    Action action = () =>
+                    {
+                        var message = new ReadOnlySpan<byte>(IntPtr.Zero.ToPointer(), int.MaxValue);
+                        var nonce = XChaChaNonce.Generate();
+                        cipher.Encrypt(message, key, nonce);
+                    };
+
+                    var exception = Assert.Throws<ArgumentException>(action);
+                    Assert.Equal("message is too long", exception.Message);
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(CipherTypes))]
+        public void Test_Encrypt_MaxMessageLengthExceeded_ThrowsException(Type cipherType)
+        {
+            unsafe
+            {
+                using (var key = XChaChaKey.Generate())
+                {
+                    var cipher = (XChaChaSecretKeyCipher)Activator.CreateInstance(cipherType);
+                    Action action = () =>
+                    {
+                        var message = new ReadOnlySpan<byte>(IntPtr.Zero.ToPointer(), int.MaxValue);
+                        var cipherText = new Span<byte>(IntPtr.Zero.ToPointer(), int.MaxValue);
+                        var nonce = XChaChaNonce.Generate();
+                        cipher.Encrypt(message, cipherText, key, nonce);
+                    };
+
+                    var exception = Assert.Throws<ArgumentException>(action);
+                    Assert.Equal("message is too long", exception.Message);
+                }
+            }
+        }
+        #endregion
     }
 }

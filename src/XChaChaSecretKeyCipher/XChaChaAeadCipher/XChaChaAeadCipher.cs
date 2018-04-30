@@ -36,10 +36,14 @@ namespace XChaChaDotNet
         /// <param name="nonce">The nonce to use when encrypting the <paramref name="message"/>.</param>
         /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         /// <returns>The computed ciphertext.</returns>
-        public Span<byte> Encrypt(ReadOnlySpan<byte> message, XChaChaKey key, XChaChaNonce nonce, ReadOnlySpan<byte> additionalData)
+        public Span<byte> Encrypt(
+            ReadOnlySpan<byte> message, 
+            XChaChaKey key, 
+            XChaChaNonce nonce, 
+            ReadOnlySpan<byte> additionalData)
         {
-            var cipherTextLength = GetCipherTextLength(message.Length);
-            var cipherText = new byte[cipherTextLength];
+            ValidateMaxMessageLength(message);
+            var cipherText = new byte[GetCipherTextLength(message.Length)];
             this.Encrypt(message, cipherText, key, nonce, additionalData);
             return cipherText;
         }
@@ -72,7 +76,11 @@ namespace XChaChaDotNet
         /// <param name="nonce">The nonce to use when decrypting the <paramref name="ciphertext"/>.</param>
         /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         /// <returns>The decrypted message.</returns>
-        public Span<byte> Decrypt(ReadOnlySpan<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce, ReadOnlySpan<byte> additionalData)
+        public Span<byte> Decrypt(
+            ReadOnlySpan<byte> ciphertext, 
+            XChaChaKey key, 
+            XChaChaNonce nonce, 
+            ReadOnlySpan<byte> additionalData)
         {
             var messageLength = GetPlaintextLength(ciphertext.Length);
             var message = new byte[messageLength];
@@ -124,6 +132,27 @@ namespace XChaChaDotNet
         public override int GetPlaintextLength(int ciphertextLength) =>
             Math.Max(0, ciphertextLength - crypto_aead_xchacha20poly1305_ietf_ABYTES);
 
+        private protected override int GetMaximumMessageSize() =>
+            int.MaxValue - crypto_aead_xchacha20poly1305_ietf_ABYTES;
+
+        private protected override void InternalEncrypt(
+            ReadOnlySpan<byte> message,
+            Span<byte> ciphertext,
+            XChaChaKey key,
+            XChaChaNonce nonce)
+        {
+            this.InternalEncrypt(message, ciphertext, key, nonce, ReadOnlySpan<byte>.Empty);
+        }
+
+        private protected override void InternalDecrypt(
+            ReadOnlySpan<byte> ciphertext,
+            Span<byte> message,
+            XChaChaKey key,
+            XChaChaNonce nonce)
+        {
+            this.InternalDecrypt(ciphertext, message, key, nonce, ReadOnlySpan<byte>.Empty);
+        }
+
         private void InternalEncrypt(
             ReadOnlySpan<byte> message,
             Span<byte> ciphertext,
@@ -166,24 +195,6 @@ namespace XChaChaDotNet
                 key.Handle);
 
             if (result != 0) throw new CryptographicException("decryption failed");
-        }
-
-        private protected override void InternalEncrypt(
-            ReadOnlySpan<byte> message,
-            Span<byte> ciphertext,
-            XChaChaKey key,
-            XChaChaNonce nonce)
-        {
-            this.InternalEncrypt(message, ciphertext, key, nonce, ReadOnlySpan<byte>.Empty);
-        }
-
-        private protected override void InternalDecrypt(
-            ReadOnlySpan<byte> ciphertext,
-            Span<byte> message,
-            XChaChaKey key,
-            XChaChaNonce nonce)
-        {
-            this.InternalDecrypt(ciphertext, message, key, nonce, ReadOnlySpan<byte>.Empty);
         }
     }
 }

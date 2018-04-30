@@ -8,20 +8,6 @@ namespace XChaChaDotNet
     public abstract class XChaChaSecretKeyCipher : IXChaChaSecretKeyCipher
     {
         /// <summary>
-        /// Calculates the size of the ciphertext for a given plaintext length.
-        /// </summary>
-        /// <param name="plaintextLength">The length of the plaintext.</param>
-        /// <returns>The length of the ciphertext.</returns>
-        public abstract int GetCipherTextLength(int plaintextLength);
-
-        /// <summary>
-        /// Calculates the size of the plaintext for a given ciphertext length.
-        /// </summary>
-        /// <param name="ciphertextLength">The length of the ciphertext.</param>
-        /// <returns>The length of the plaintext.</returns>
-        public abstract int GetPlaintextLength(int ciphertextLength);
-
-        /// <summary>
         /// Encrypts the <paramref name="message"/> and writes computed ciphertext to <paramref name="ciphertext"/>.
         /// </summary>
         /// <param name="message">The message to encrypt.</param>
@@ -42,8 +28,8 @@ namespace XChaChaDotNet
         /// <returns>The computed ciphertext.</returns>
         public Span<byte> Encrypt(ReadOnlySpan<byte> message, XChaChaKey key, XChaChaNonce nonce)
         {
-            var cipherTextLength = GetCipherTextLength(message.Length);
-            var cipherText = new byte[cipherTextLength];
+            this.ValidateMaxMessageLength(message);
+            var cipherText = new byte[GetCipherTextLength(message.Length)];
             this.Encrypt(message, cipherText, key, nonce);
             return cipherText;
         }
@@ -99,20 +85,57 @@ namespace XChaChaDotNet
             }
         }
 
+        /// <summary>
+        /// Calculates the size of the ciphertext for a given plaintext length.
+        /// </summary>
+        /// <param name="plaintextLength">The length of the plaintext.</param>
+        /// <returns>The length of the ciphertext.</returns>
+        public abstract int GetCipherTextLength(int plaintextLength);
+
+        /// <summary>
+        /// Calculates the size of the plaintext for a given ciphertext length.
+        /// </summary>
+        /// <param name="ciphertextLength">The length of the ciphertext.</param>
+        /// <returns>The length of the plaintext.</returns>
+        public abstract int GetPlaintextLength(int ciphertextLength);
+
+        private protected abstract int GetMaximumMessageSize();
+
+        private protected abstract void InternalEncrypt(
+            ReadOnlySpan<byte> message,
+            Span<byte> ciphertext,
+            XChaChaKey key,
+            XChaChaNonce nonce);
+
+        private protected abstract void InternalDecrypt(
+            ReadOnlySpan<byte> ciphertext,
+            Span<byte> message,
+            XChaChaKey key,
+            XChaChaNonce nonce);
+
         private protected void ValidateEncryptParameters(ReadOnlySpan<byte> message, Span<byte> ciphertext, XChaChaNonce nonce)
         {
-            if (ciphertext.Length < GetCipherTextLength(message.Length))
-                throw new ArgumentException($"{nameof(ciphertext)} buffer is not large enough");
-
+            ValidateMaxMessageLength(message);
+            ValidateCiphertextLength(message, ciphertext);
             ValidateNonce(nonce);
         }
 
         private protected void ValidateDecryptParameters(ReadOnlySpan<byte> ciphertext, Span<byte> message, XChaChaNonce nonce)
         {
-            if (message.Length < GetPlaintextLength(ciphertext.Length))
-                throw new ArgumentException($"{nameof(message)} buffer is not large enough");
-
+            ValidateMessageLength(ciphertext, message);
             ValidateNonce(nonce);
+        }
+
+        private void ValidateCiphertextLength(ReadOnlySpan<byte> message, Span<byte> ciphertext)
+        {
+            if (ciphertext.Length < GetCipherTextLength(message.Length))
+                throw new ArgumentException($"{nameof(ciphertext)} buffer is not large enough");
+        }
+
+        private protected void ValidateMaxMessageLength(ReadOnlySpan<byte> message)
+        {
+            if (message.Length > GetMaximumMessageSize())
+                throw new ArgumentException($"{nameof(message)} is too long");
         }
 
         private static void ValidateNonce(XChaChaNonce nonce)
@@ -121,7 +144,10 @@ namespace XChaChaDotNet
                 throw new ArgumentException($"{nameof(nonce)} is empty");
         }
 
-        private protected abstract void InternalEncrypt(ReadOnlySpan<byte> message, Span<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce);
-        private protected abstract void InternalDecrypt(ReadOnlySpan<byte> ciphertext, Span<byte> message, XChaChaKey key, XChaChaNonce nonce);
+        private void ValidateMessageLength(ReadOnlySpan<byte> ciphertext, Span<byte> message)
+        {
+            if (message.Length < GetPlaintextLength(ciphertext.Length))
+                throw new ArgumentException($"{nameof(message)} buffer is not large enough");
+        }
     }
 }

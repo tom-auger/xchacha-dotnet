@@ -13,7 +13,7 @@ namespace XChaChaDotNet
         [Fact]
         public void Test_Encrypt_WithAdditionalData_ProducesNonZeroOutput()
         {
-           using (var key = XChaChaKey.Generate())
+            using (var key = XChaChaKey.Generate())
             {
                 var aeadCipher = new XChaChaAeadCipher();
                 var nonce = XChaChaNonce.Generate();
@@ -49,6 +49,7 @@ namespace XChaChaDotNet
         }
         #endregion
 
+        #region Validation
         [Theory]
         [InlineData(4, 0)]
         [InlineData(15, 0)]
@@ -60,5 +61,51 @@ namespace XChaChaDotNet
             var plaintextLength = aeadCipher.GetPlaintextLength(ciphertextLength);
             Assert.Equal(expectedPlaintextLength, plaintextLength);
         }
+
+        [Fact]
+        public void Test_EncryptWithReturn_MaxMessageLengthExceeded_ThrowsException()
+        {
+            unsafe
+            {
+                using (var key = XChaChaKey.Generate())
+                {
+                    var aeadCipher = new XChaChaAeadCipher();
+                    Action action = () =>
+                    {
+                        var message = new ReadOnlySpan<byte>(IntPtr.Zero.ToPointer(), int.MaxValue);
+                        var additionalData = Encoding.UTF8.GetBytes(DateTime.Now.ToString());
+                        var nonce = XChaChaNonce.Generate();
+                        aeadCipher.Encrypt(message, key, nonce, additionalData);
+                    };
+
+                    var exception = Assert.Throws<ArgumentException>(action);
+                    Assert.Equal("message is too long", exception.Message);
+                }
+            }
+        }
+
+        [Fact]
+        public void Test_Encrypt_MaxMessageLengthExceeded_ThrowsException()
+        {
+            unsafe
+            {
+                using (var key = XChaChaKey.Generate())
+                {
+                    var aeadCipher = new XChaChaAeadCipher();
+                    Action action = () =>
+                    {
+                        var message = new ReadOnlySpan<byte>(IntPtr.Zero.ToPointer(), int.MaxValue);
+                        var cipherText = new Span<byte>(IntPtr.Zero.ToPointer(), int.MaxValue);
+                        var additionalData = Encoding.UTF8.GetBytes(DateTime.Now.ToString());
+                        var nonce = XChaChaNonce.Generate();
+                        aeadCipher.Encrypt(message, cipherText, key, nonce, additionalData);
+                    };
+
+                    var exception = Assert.Throws<ArgumentException>(action);
+                    Assert.Equal("message is too long", exception.Message);
+                }
+            }
+        }
+        #endregion
     }
 }

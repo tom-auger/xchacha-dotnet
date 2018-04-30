@@ -27,7 +27,14 @@
         public override int GetPlaintextLength(int ciphertextLength) =>
             Math.Max(0, ciphertextLength - crypto_secretbox_xchacha20poly1305_MACBYTES);
 
-        private protected override void InternalEncrypt(ReadOnlySpan<byte> message, Span<byte> ciphertext, XChaChaKey key, XChaChaNonce nonce)
+        private protected override int GetMaximumMessageSize() => 
+            int.MaxValue - crypto_secretbox_xchacha20poly1305_MACBYTES;
+
+        private protected override void InternalEncrypt(
+            ReadOnlySpan<byte> message,
+            Span<byte> ciphertext,
+            XChaChaKey key,
+            XChaChaNonce nonce)
         {
             ValidateEncryptParameters(message, ciphertext, nonce);
             crypto_secretbox_xchacha20poly1305_easy(
@@ -38,7 +45,11 @@
                 key.Handle);
         }
 
-        private protected override void InternalDecrypt(ReadOnlySpan<byte> ciphertext, Span<byte> message, XChaChaKey key, XChaChaNonce nonce)
+        private protected override void InternalDecrypt(
+            ReadOnlySpan<byte> ciphertext, 
+            Span<byte> message,
+            XChaChaKey key,
+            XChaChaNonce nonce)
         {
             ValidateDecryptParameters(ciphertext, message, nonce);
             var returnCode = crypto_secretbox_xchacha20poly1305_open_easy(
