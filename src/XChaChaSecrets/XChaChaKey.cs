@@ -51,6 +51,11 @@ namespace XChaChaDotNet
             return new XChaChaKey(handle);
         }
 
+        /// <summary>
+        /// Returns the raw key byte.
+        /// </summary>
+        public byte[] ToArray() => this.handle.DangerousGetSpan().ToArray();
+
         internal GuardedMemoryHandle Handle => this.handle;
 
         #region IDisposable
