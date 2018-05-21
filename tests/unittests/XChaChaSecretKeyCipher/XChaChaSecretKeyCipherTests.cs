@@ -19,12 +19,12 @@ namespace XChaChaDotNet
         [MemberData(nameof(CipherTypes))]
         public void Test_Encrypt_ProducesNonZeroOutput(Type cipherType)
         {
-            using (var key = XChaChaKey.Generate())
+            using (var key = new XChaChaKey(XChaChaConstants.Key))
             {
                 var cipher = (XChaChaSecretKeyCipher)Activator.CreateInstance(cipherType);
                 var nonce = XChaChaNonce.Generate();
 
-                var message = RandomBytesGenerator.NextBytes(1024 * 1024);
+                var message = XChaChaConstants.MessageBytes;
                 var ciphertext = new byte[cipher.GetCipherTextLength(message.Length)];
 
                 cipher.Encrypt(message, ciphertext, key, nonce);
@@ -40,13 +40,11 @@ namespace XChaChaDotNet
             using (var key = XChaChaKey.Generate())
             {
                 var cipher = (XChaChaSecretKeyCipher)Activator.CreateInstance(cipherType);
-                var message = Array.Empty<byte>();
-                var ciphertext = new byte[cipher.GetCipherTextLength(message.Length)];
-
+                var message = XChaChaConstants.MessageBytes;
                 Action action = () =>
                     {
                         var nonce = new XChaChaNonce();
-                        cipher.Encrypt(message, ciphertext, key, nonce);
+                        cipher.Encrypt(message, key, nonce);
                     };
 
                 var exception = Assert.Throws<ArgumentException>(action);
@@ -61,12 +59,12 @@ namespace XChaChaDotNet
             using (var key = XChaChaKey.Generate())
             {
                 var cipher = (XChaChaSecretKeyCipher)Activator.CreateInstance(cipherType);
-                var message = Array.Empty<byte>();
+                var message = XChaChaConstants.MessageBytes;
                 var ciphertext = Array.Empty<byte>();
 
                 Action action = () =>
                     {
-                        var nonce = XChaChaNonce.Generate();
+                        var nonce = new XChaChaNonce(XChaChaConstants.Nonce);
                         cipher.Encrypt(message, ciphertext, key, nonce);
                     };
 
@@ -79,12 +77,12 @@ namespace XChaChaDotNet
         [MemberData(nameof(CipherTypes))]
         public void Test_Encrypt_ReturnsCiphertext(Type cipherType)
         {
-            using (var key = XChaChaKey.Generate())
+            using (var key = new XChaChaKey(XChaChaConstants.Key))
             {
                 var cipher = (XChaChaSecretKeyCipher)Activator.CreateInstance(cipherType);
-                var nonce = XChaChaNonce.Generate();
+                var nonce = new XChaChaNonce(XChaChaConstants.Nonce);
 
-                var message = RandomBytesGenerator.NextBytes(1024 * 1024);
+                var message = XChaChaConstants.MessageBytes;
                 var ciphertext = cipher.Encrypt(message, key, nonce);
 
                 Assert.False(ciphertext.All(b => b == 0));
@@ -95,12 +93,76 @@ namespace XChaChaDotNet
         #region Decryption
         [Theory]
         [MemberData(nameof(CipherTypes))]
-        public void Test_TryDecrypt_CanDecryptCiphertext(Type cipherType)
+        public void Test_Decrypt_CanDecryptCiphertext(Type cipherType)
         {
-            using (var key = XChaChaKey.Generate())
+            using (var key = new XChaChaKey(XChaChaConstants.Key))
             {
                 var cipher = (XChaChaSecretKeyCipher)Activator.CreateInstance(cipherType);
-                var nonce = XChaChaNonce.Generate();
+                var nonce = new XChaChaNonce(XChaChaConstants.Nonce);
+                var message = XChaChaConstants.MessageBytes;
+
+                var ciphertext = cipher.Encrypt(message, key, nonce);
+                var result = cipher.Decrypt(ciphertext, key, nonce);
+
+                Assert.Equal(message, result);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(CipherTypes))]
+        public void Test_Decrypt_WrongNonce_ThrowsException(Type cipherType)
+        {
+            using (var key = new XChaChaKey(XChaChaConstants.Key))
+            {
+                var cipher = (XChaChaSecretKeyCipher)Activator.CreateInstance(cipherType);
+                var nonce = new XChaChaNonce(XChaChaConstants.Nonce);
+                var message = XChaChaConstants.MessageBytes;
+
+                var ciphertext = cipher.Encrypt(message, key, nonce);
+                Action action = () =>
+                {
+                    var wrongNonce = XChaChaNonce.Generate();
+                    var result = cipher.Decrypt(ciphertext, key, wrongNonce);
+                };
+
+                var exception = Assert.Throws<CryptographicException>(action);
+                Assert.Equal("decryption failed", exception.Message);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(CipherTypes))]
+        public void Test_Decrypt_WrongKey_ThrowsException(Type cipherType)
+        {
+            using (var key = new XChaChaKey(XChaChaConstants.Key))
+            {
+                var cipher = (XChaChaSecretKeyCipher)Activator.CreateInstance(cipherType);
+                var nonce = new XChaChaNonce(XChaChaConstants.Nonce);
+                var message = XChaChaConstants.MessageBytes;
+
+                var ciphertext = cipher.Encrypt(message, key, nonce);
+                using (var wrongKey = XChaChaKey.Generate())
+                {
+                    Action action = () =>
+                    {
+                        var nonce2 = new XChaChaNonce(XChaChaConstants.Nonce);
+                        var result = cipher.Decrypt(ciphertext, wrongKey, nonce2);
+                    };
+
+                    var exception = Assert.Throws<CryptographicException>(action);
+                    Assert.Equal("decryption failed", exception.Message);
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(CipherTypes))]
+        public void Test_TryDecrypt_CanDecryptCiphertext(Type cipherType)
+        {
+            using (var key = new XChaChaKey(XChaChaConstants.Key))
+            {
+                var cipher = (XChaChaSecretKeyCipher)Activator.CreateInstance(cipherType);
+                var nonce = new XChaChaNonce(XChaChaConstants.Nonce);
 
                 const int messageLength = 1024 * 1024;
                 var message = RandomBytesGenerator.NextBytes(messageLength);
