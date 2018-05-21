@@ -45,7 +45,7 @@ namespace XChaChaDotNet
 
                 Action action = () =>
                     {
-                        XChaChaNonce nonce;
+                        var nonce = new XChaChaNonce();
                         cipher.Encrypt(message, ciphertext, key, nonce);
                     };
 
@@ -66,7 +66,7 @@ namespace XChaChaDotNet
 
                 Action action = () =>
                     {
-                        XChaChaNonce nonce;
+                        var nonce = XChaChaNonce.Generate();
                         cipher.Encrypt(message, ciphertext, key, nonce);
                     };
 
@@ -127,7 +127,7 @@ namespace XChaChaDotNet
 
                 Action action = () =>
                     {
-                        XChaChaNonce nonce;
+                        var nonce = new XChaChaNonce();
                         cipher.Decrypt(ciphertext, message, key, nonce);
                     };
 
@@ -148,7 +148,7 @@ namespace XChaChaDotNet
 
                 Action action = () =>
                     {
-                        XChaChaNonce nonce;
+                        var nonce = XChaChaNonce.Generate();
                         cipher.Decrypt(ciphertext, message, key, nonce);
                     };
 
