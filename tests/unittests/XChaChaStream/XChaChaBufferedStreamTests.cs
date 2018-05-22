@@ -6,7 +6,7 @@ namespace XChaChaDotNet.UnitTests
     using System.Linq;
     using System.Text;
     using Xunit;
-    using static XChaChaConstants;
+    using static TestConstants;
 
     public class XChaChaBufferedStreamTests
     {

@@ -4,7 +4,7 @@ namespace XChaChaDotNet.UnitTests
     using System.IO;
     using System.Security.Cryptography;
     using Xunit;
-    using static XChaChaConstants;
+    using static TestConstants;
 
     public class XChaChaStreamBaseTests
     {

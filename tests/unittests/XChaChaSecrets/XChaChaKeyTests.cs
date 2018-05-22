@@ -20,14 +20,14 @@ namespace XChaChaDotNet.UnitTests
             using (var key = XChaChaKey.Generate())
             {
                 var keyBytes = key.ToArray();
-                Assert.Equal(XChaChaConstants.KeyLength, keyBytes.Length);
+                Assert.Equal(TestConstants.KeyLength, keyBytes.Length);
             }
         }
 
         [Fact]
         public void Test_ToArray_ReturnsKey()
         {
-            var keyBytes = XChaChaConstants.Key;
+            var keyBytes = TestConstants.Key;
             using (var key = new XChaChaKey(keyBytes))
             {
                 var result = key.ToArray();

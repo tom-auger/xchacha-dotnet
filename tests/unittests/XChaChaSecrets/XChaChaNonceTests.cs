@@ -2,7 +2,7 @@ namespace XChaChaDotNet.UnitTests
 {
     using System;
     using Xunit;
-    using static XChaChaConstants;
+    using static TestConstants;
 
     public class XChaChaNonceTests
     {
