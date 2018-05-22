@@ -14,7 +14,7 @@ namespace XChaChaDotNet.UnitTests
         [Fact]
         public void Test_Encrypt_ProducesCorrectOutputLength()
         {
-            var plainText = Encoding.UTF8.GetBytes("banana");
+            var plainText = TestConstants.MessageBytes;
             using (var outputStream = new MemoryStream())
             {
                 using (var key = XChaChaKey.Generate())
@@ -95,7 +95,7 @@ namespace XChaChaDotNet.UnitTests
         [Fact]
         public void Test_Encrypt_WithAdditionalData()
         {
-            var plainText = Encoding.UTF8.GetBytes("banana");
+            var plainText = TestConstants.MessageBytes;
             var additionalData = Encoding.UTF8.GetBytes("apple");
 
             using (var outputStream = new MemoryStream())
@@ -151,7 +151,7 @@ namespace XChaChaDotNet.UnitTests
             using (var cipherTextStream = new MemoryStream())
             using (var key = XChaChaKey.Generate())
             {
-                var plainText = Encoding.UTF8.GetBytes("banana");
+                var plainText = TestConstants.MessageBytes;
 
                 using (var encryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
@@ -177,7 +177,7 @@ namespace XChaChaDotNet.UnitTests
             using (var cipherTextStream = new MemoryStream())
             using (var key = XChaChaKey.Generate())
             {
-                var plainText = Encoding.UTF8.GetBytes("banana");
+                var plainText = TestConstants.MessageBytes;
                 var additionalData = Encoding.UTF8.GetBytes("apple");
 
                 using (var encryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
@@ -205,7 +205,7 @@ namespace XChaChaDotNet.UnitTests
             using (var cipherTextStream = new MemoryStream())
             using (var key = XChaChaKey.Generate())
             {
-                var plainText = Encoding.UTF8.GetBytes("banana");
+                var plainText = TestConstants.MessageBytes;
                 var additionalData = Encoding.UTF8.GetBytes("apple");
 
                 using (var encryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
@@ -287,7 +287,7 @@ namespace XChaChaDotNet.UnitTests
             using (var cipherTextStream = new MemoryStream())
             using (var key = XChaChaKey.Generate())
             {
-                var plainText = Encoding.UTF8.GetBytes("banana");
+                var plainText = TestConstants.MessageBytes;
 
                 using (var encryptionStream = new XChaChaStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {

@@ -4,7 +4,6 @@ namespace XChaChaDotNet.UnitTests
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Text;
     using Xunit;
     using static TestConstants;
 
@@ -21,7 +20,7 @@ namespace XChaChaDotNet.UnitTests
         [Fact]
         public void Test_Encrypt_ProducesCorrectOutputLength()
         {
-            var plainText = Encoding.UTF8.GetBytes("banana");
+            var plainText = TestConstants.MessageBytes;
             using (var outputStream = new MemoryStream())
             {
                 using (var key = XChaChaKey.Generate())
@@ -133,7 +132,7 @@ namespace XChaChaDotNet.UnitTests
             using (var cipherTextStream = new MemoryStream())
             using (var key = XChaChaKey.Generate())
             {
-                var plainText = Encoding.UTF8.GetBytes("banana");
+                var plainText = TestConstants.MessageBytes;
 
                 using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
@@ -209,7 +208,7 @@ namespace XChaChaDotNet.UnitTests
             using (var cipherTextStream = new MemoryStream())
             using (var key = XChaChaKey.Generate())
             {
-                var plainText = Encoding.UTF8.GetBytes("banana");
+                var plainText = TestConstants.MessageBytes;
 
                 using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
