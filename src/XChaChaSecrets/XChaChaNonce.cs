@@ -7,11 +7,11 @@ namespace XChaChaDotNet
     /// <summary>
     /// Represents a nonce for use with XChaCha ciphers.
     /// </summary>
-    public readonly ref struct XChaChaNonce
+    public readonly struct XChaChaNonce
     {
         // All the XChaCha constructions in this library use a 24 byte nonce.
         private const int NonceLengthBytes = 24;
-        private readonly ReadOnlySpan<byte> bytes;
+        private readonly byte[] bytes;
 
         /// <summary>
         /// Creates an instance from an existing nonce.
@@ -22,7 +22,7 @@ namespace XChaChaDotNet
             if (nonceBytes.Length != NonceLengthBytes)
                 throw new ArgumentException($"{nameof(nonceBytes)} has incorrect length");
 
-            this.bytes = nonceBytes;
+            this.bytes = nonceBytes.ToArray();
         }
 
         /// <summary>
@@ -33,11 +33,11 @@ namespace XChaChaDotNet
         /// <summary>
         /// Returns the raw nonce bytes.
         /// </summary>
-        public byte[] ToArray() => this.bytes.ToArray();
+        public byte[] ToArray() => this.bytes;
 
-        internal ref byte Handle => ref MemoryMarshal.GetReference(this.bytes);
+        internal ref byte Handle => ref MemoryMarshal.GetReference((ReadOnlySpan<byte>)this.bytes);
 
-        internal bool IsEmpty => this.bytes == ReadOnlySpan<byte>.Empty;
+        internal bool IsEmpty => this.bytes == default(byte[]);
 
         /// <summary>
         /// Create a new randomly generated nonce.

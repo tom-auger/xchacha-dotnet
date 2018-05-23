@@ -10,7 +10,6 @@ namespace XChaChaDotNet.UnitTests
         public void Test_GenerateNonce_GeneratesNonceOfTheCorrectLength()
         {
             var nonce = XChaChaNonce.Generate();
-
             Assert.Equal(NonceLength, nonce.ReadOnlySpan.Length);
         }
 

@@ -41,9 +41,9 @@ namespace XChaChaDotNet
             {
                 var cipher = (XChaChaSecretKeyCipher)Activator.CreateInstance(cipherType);
                 var message = TestConstants.MessageBytes;
+                var nonce = new XChaChaNonce();
                 Action action = () =>
                     {
-                        var nonce = new XChaChaNonce();
                         cipher.Encrypt(message, key, nonce);
                     };
 
@@ -61,10 +61,9 @@ namespace XChaChaDotNet
                 var cipher = (XChaChaSecretKeyCipher)Activator.CreateInstance(cipherType);
                 var message = TestConstants.MessageBytes;
                 var ciphertext = Array.Empty<byte>();
-
+                var nonce = XChaChaNonce.Generate();
                 Action action = () =>
                     {
-                        var nonce = XChaChaNonce.Generate();
                         cipher.Encrypt(message, ciphertext, key, nonce);
                     };
 
@@ -145,8 +144,7 @@ namespace XChaChaDotNet
                 {
                     Action action = () =>
                     {
-                        var nonce2 = new XChaChaNonce(TestConstants.Nonce);
-                        var result = cipher.Decrypt(ciphertext, wrongKey, nonce2);
+                        var result = cipher.Decrypt(ciphertext, wrongKey, nonce);
                     };
 
                     var exception = Assert.Throws<CryptographicException>(action);
@@ -184,12 +182,12 @@ namespace XChaChaDotNet
             using (var key = XChaChaKey.Generate())
             {
                 var cipher = (XChaChaSecretKeyCipher)Activator.CreateInstance(cipherType);
+                var nonce = new XChaChaNonce();
                 var message = Array.Empty<byte>();
                 var ciphertext = Array.Empty<byte>();
 
                 Action action = () =>
                     {
-                        var nonce = new XChaChaNonce();
                         cipher.Decrypt(ciphertext, message, key, nonce);
                     };
 
@@ -207,10 +205,10 @@ namespace XChaChaDotNet
                 var cipher = (XChaChaSecretKeyCipher)Activator.CreateInstance(cipherType);
                 var message = Array.Empty<byte>();
                 var ciphertext = new byte[cipher.GetCipherTextLength(1)];
+                var nonce = XChaChaNonce.Generate();
 
                 Action action = () =>
                     {
-                        var nonce = XChaChaNonce.Generate();
                         cipher.Decrypt(ciphertext, message, key, nonce);
                     };
 
