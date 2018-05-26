@@ -240,7 +240,7 @@ namespace XChaChaDotNet
             var encryptionResult = crypto_secretstream_xchacha20poly1305_push(
                     this.state.Handle,
                     ref MemoryMarshal.GetReference(this.ciphertextBuffer.AsSpan()),
-                    out var cipherTextLength,
+                    out var ciphertextLength,
                     in MemoryMarshal.GetReference(block),
                     (ulong)block.Length,
                     ref MemoryMarshal.GetReference(ReadOnlySpan<byte>.Empty),
@@ -249,7 +249,7 @@ namespace XChaChaDotNet
 
             if (encryptionResult != 0) throw new CryptographicException("encryption of block failed");
 
-            this.stream.Write(this.ciphertextBuffer.AsReadOnlySpan(0, (int)cipherTextLength));
+            this.stream.Write(this.ciphertextBuffer.AsReadOnlySpan(0, (int)ciphertextLength));
             this.plaintextBufferPosition = 0;
         }
 

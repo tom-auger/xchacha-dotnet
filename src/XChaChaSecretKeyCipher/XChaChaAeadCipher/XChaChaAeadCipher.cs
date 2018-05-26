@@ -37,15 +37,15 @@ namespace XChaChaDotNet
         /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         /// <returns>The computed ciphertext.</returns>
         public byte[] Encrypt(
-            ReadOnlySpan<byte> message, 
-            XChaChaKey key, 
-            XChaChaNonce nonce, 
+            ReadOnlySpan<byte> message,
+            XChaChaKey key,
+            XChaChaNonce nonce,
             ReadOnlySpan<byte> additionalData)
         {
             ValidateMaxMessageLength(message);
-            var cipherText = new byte[GetCipherTextLength(message.Length)];
-            this.Encrypt(message, cipherText, key, nonce, additionalData);
-            return cipherText;
+            var ciphertext = new byte[GetCipherTextLength(message.Length)];
+            this.Encrypt(message, ciphertext, key, nonce, additionalData);
+            return ciphertext;
         }
 
         /// <summary>
@@ -77,9 +77,9 @@ namespace XChaChaDotNet
         /// <param name="additionalData">The associated data to use for computing the authentication tag.</param>
         /// <returns>The decrypted message.</returns>
         public byte[] Decrypt(
-            ReadOnlySpan<byte> ciphertext, 
-            XChaChaKey key, 
-            XChaChaNonce nonce, 
+            ReadOnlySpan<byte> ciphertext,
+            XChaChaKey key,
+            XChaChaNonce nonce,
             ReadOnlySpan<byte> additionalData)
         {
             var messageLength = GetPlaintextLength(ciphertext.Length);

@@ -338,9 +338,9 @@ namespace XChaChaDotNet
                     Action action = () =>
                     {
                         var message = new ReadOnlySpan<byte>(IntPtr.Zero.ToPointer(), int.MaxValue);
-                        var cipherText = new Span<byte>(IntPtr.Zero.ToPointer(), int.MaxValue);
+                        var ciphertext = new Span<byte>(IntPtr.Zero.ToPointer(), int.MaxValue);
                         var nonce = XChaChaNonce.Generate();
-                        cipher.Encrypt(message, cipherText, key, nonce);
+                        cipher.Encrypt(message, ciphertext, key, nonce);
                     };
 
                     var exception = Assert.Throws<ArgumentException>(action);

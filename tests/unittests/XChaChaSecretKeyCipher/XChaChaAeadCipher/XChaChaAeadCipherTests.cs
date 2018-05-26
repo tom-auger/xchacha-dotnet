@@ -80,7 +80,7 @@ namespace XChaChaDotNet
                 var invalidAdditionalData = Encoding.UTF8.GetBytes("banana");
                 Action action = () => { aeadCipher.Decrypt(ciphertext, key, new XChaChaNonce(nonce), invalidAdditionalData); };
                 var exception = Assert.Throws<CryptographicException>(action);
-                
+
                 Assert.Equal("decryption failed", exception.Message);
             }
         }
@@ -132,10 +132,10 @@ namespace XChaChaDotNet
                     Action action = () =>
                     {
                         var message = new ReadOnlySpan<byte>(IntPtr.Zero.ToPointer(), int.MaxValue);
-                        var cipherText = new Span<byte>(IntPtr.Zero.ToPointer(), int.MaxValue);
+                        var ciphertext = new Span<byte>(IntPtr.Zero.ToPointer(), int.MaxValue);
                         var additionalData = Encoding.UTF8.GetBytes(DateTime.Now.ToString());
                         var nonce = XChaChaNonce.Generate();
-                        aeadCipher.Encrypt(message, cipherText, key, nonce, additionalData);
+                        aeadCipher.Encrypt(message, ciphertext, key, nonce, additionalData);
                     };
 
                     var exception = Assert.Throws<ArgumentException>(action);

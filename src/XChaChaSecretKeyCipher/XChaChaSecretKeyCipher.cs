@@ -29,9 +29,9 @@ namespace XChaChaDotNet
         public byte[] Encrypt(ReadOnlySpan<byte> message, XChaChaKey key, XChaChaNonce nonce)
         {
             this.ValidateMaxMessageLength(message);
-            var cipherText = new byte[GetCipherTextLength(message.Length)];
-            this.Encrypt(message, cipherText, key, nonce);
-            return cipherText;
+            var ciphertext = new byte[GetCipherTextLength(message.Length)];
+            this.Encrypt(message, ciphertext, key, nonce);
+            return ciphertext;
         }
 
         /// <summary>
