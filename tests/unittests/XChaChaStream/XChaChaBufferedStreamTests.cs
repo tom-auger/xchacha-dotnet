@@ -21,20 +21,20 @@ namespace XChaChaDotNet.UnitTests
         [Fact]
         public void Test_Encrypt_ProducesCorrectOutputLength()
         {
-            var plainText = TestConstants.MessageBytes;
+            var plaintext = TestConstants.MessageBytes;
             using (var outputStream = new MemoryStream())
             {
                 using (var key = XChaChaKey.Generate())
                 using (var encryptionStream = new XChaChaBufferedStream(outputStream, key, EncryptionMode.Encrypt))
                 {
-                    encryptionStream.Write(plainText);
+                    encryptionStream.Write(plaintext);
                 }
 
                 var cipherText = outputStream.ToArray();
 
                 // The encryption stream encrypts in 128KB blocks
                 const int numberOfBlocks = 1;
-                var expectedCipherTextLength = plainText.Length + StreamHeaderLength + (StreamABytes * numberOfBlocks);
+                var expectedCipherTextLength = plaintext.Length + StreamHeaderLength + (StreamABytes * numberOfBlocks);
                 Assert.Equal(expectedCipherTextLength, cipherText.Length);
             }
         }
@@ -43,20 +43,20 @@ namespace XChaChaDotNet.UnitTests
         [MemberData(nameof(TestBufferLengths))]
         public void Test_Encrypt_WithLargeData_ProducesCorrectOutputLength(int bufferLength)
         {
-            var plainText = RandomBytesGenerator.NextBytes(1024 * 1024);
+            var plaintext = RandomBytesGenerator.NextBytes(1024 * 1024);
 
             using (var outputStream = new MemoryStream())
             {
                 using (var key = XChaChaKey.Generate())
                 using (var encryptionStream = new XChaChaBufferedStream(outputStream, key, EncryptionMode.Encrypt, bufferLength))
                 {
-                    encryptionStream.Write(plainText);
+                    encryptionStream.Write(plaintext);
                 }
 
                 var cipherText = outputStream.ToArray();
 
-                var numberOfBlocks = Math.Ceiling((decimal)plainText.Length / bufferLength);
-                var expectedCipherTextLength = plainText.Length + StreamHeaderLength + (StreamABytes * numberOfBlocks);
+                var numberOfBlocks = Math.Ceiling((decimal)plaintext.Length / bufferLength);
+                var expectedCipherTextLength = plaintext.Length + StreamHeaderLength + (StreamABytes * numberOfBlocks);
                 Assert.Equal(expectedCipherTextLength, cipherText.Length);
             }
         }
@@ -69,9 +69,9 @@ namespace XChaChaDotNet.UnitTests
                 using (var key = XChaChaKey.Generate())
                 using (var encryptionStream = new XChaChaBufferedStream(outputStream, key, EncryptionMode.Encrypt))
                 {
-                    var plainText = Array.Empty<byte>();
+                    var plaintext = Array.Empty<byte>();
 
-                    encryptionStream.Write(plainText);
+                    encryptionStream.Write(plaintext);
                 }
 
                 var cipherText = outputStream.ToArray();
@@ -87,9 +87,9 @@ namespace XChaChaDotNet.UnitTests
             using (var key = XChaChaKey.Generate())
             using (var encryptionStream = new XChaChaBufferedStream(outputStream, key, EncryptionMode.Encrypt))
             {
-                var plainText = Array.Empty<byte>();
+                var plaintext = Array.Empty<byte>();
 
-                encryptionStream.Write(plainText);
+                encryptionStream.Write(plaintext);
                 encryptionStream.Flush();
 
                 var cipherText = outputStream.ToArray();
@@ -101,11 +101,11 @@ namespace XChaChaDotNet.UnitTests
         [MemberData(nameof(TestBufferLengths))]
         public void Test_Encrypt_WriteDifferentAmountsToStream(int bufferLength)
         {
-            var plainText1 = RandomBytesGenerator.NextBytes(157 * 1024);
-            var plainText2 = RandomBytesGenerator.NextBytes(314 * 1024);
+            var plaintext1 = RandomBytesGenerator.NextBytes(157 * 1024);
+            var plaintext2 = RandomBytesGenerator.NextBytes(314 * 1024);
             var plaintext3 = RandomBytesGenerator.NextBytes(273 * 1024);
 
-            var totalPlainTextLength = plainText1.Length + plainText2.Length + plaintext3.Length;
+            var totalPlainTextLength = plaintext1.Length + plaintext2.Length + plaintext3.Length;
             var numberOfBlocks = Math.Ceiling((decimal)totalPlainTextLength / bufferLength);
             var expectedOutputLength = StreamHeaderLength + totalPlainTextLength + (numberOfBlocks * StreamABytes);
 
@@ -114,8 +114,8 @@ namespace XChaChaDotNet.UnitTests
                 using (var key = XChaChaKey.Generate())
                 using (var encryptionStream = new XChaChaBufferedStream(outputStream, key, EncryptionMode.Encrypt, bufferLength))
                 {
-                    encryptionStream.Write(plainText1);
-                    encryptionStream.Write(plainText2);
+                    encryptionStream.Write(plaintext1);
+                    encryptionStream.Write(plaintext2);
                     encryptionStream.Write(plaintext3);
                 }
 
@@ -133,22 +133,22 @@ namespace XChaChaDotNet.UnitTests
             using (var cipherTextStream = new MemoryStream())
             using (var key = XChaChaKey.Generate())
             {
-                var plainText = TestConstants.MessageBytes;
+                var plaintext = TestConstants.MessageBytes;
 
                 using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
-                    encryptionStream.Write(plainText);
+                    encryptionStream.Write(plaintext);
                 }
 
                 cipherTextStream.Position = 0;
 
                 using (var decryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Decrypt))
                 {
-                    var decryptedPlainText = new byte[plainText.Length];
+                    var decryptedPlainText = new byte[plaintext.Length];
                     var numberOfBytesOutput = decryptionStream.Read(decryptedPlainText);
 
-                    Assert.Equal(plainText.Length, numberOfBytesOutput);
-                    Assert.Equal(plainText, decryptedPlainText);
+                    Assert.Equal(plaintext.Length, numberOfBytesOutput);
+                    Assert.Equal(plaintext, decryptedPlainText);
                 }
             }
         }
@@ -159,18 +159,18 @@ namespace XChaChaDotNet.UnitTests
             using (var cipherTextStream = new MemoryStream())
             using (var key = XChaChaKey.Generate())
             {
-                var plainText = RandomBytesGenerator.NextBytes(1024 * 1024);
+                var plaintext = RandomBytesGenerator.NextBytes(1024 * 1024);
 
                 using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
-                    encryptionStream.Write(plainText);
+                    encryptionStream.Write(plaintext);
                 }
 
                 cipherTextStream.Position = 0;
 
                 using (var decryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Decrypt))
                 {
-                    var decryptedPlainText = new byte[plainText.Length];
+                    var decryptedPlainText = new byte[plaintext.Length];
 
                     decryptionStream.Read(decryptedPlainText, 0, decryptedPlainText.Length / 2);
                     Assert.False(decryptionStream.VerifyEndOfMessage());
@@ -184,18 +184,18 @@ namespace XChaChaDotNet.UnitTests
             using (var cipherTextStream = new MemoryStream())
             using (var key = XChaChaKey.Generate())
             {
-                var plainText = RandomBytesGenerator.NextBytes(1024 * 1024);
+                var plaintext = RandomBytesGenerator.NextBytes(1024 * 1024);
 
                 using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
-                    encryptionStream.Write(plainText);
+                    encryptionStream.Write(plaintext);
                 }
 
                 cipherTextStream.Position = 0;
 
                 using (var decryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Decrypt))
                 {
-                    var decryptedPlainText = new byte[plainText.Length];
+                    var decryptedPlainText = new byte[plaintext.Length];
 
                     decryptionStream.Read(decryptedPlainText);
                     Assert.True(decryptionStream.VerifyEndOfMessage());
@@ -209,22 +209,22 @@ namespace XChaChaDotNet.UnitTests
             using (var cipherTextStream = new MemoryStream())
             using (var key = XChaChaKey.Generate())
             {
-                var plainText = TestConstants.MessageBytes;
+                var plaintext = TestConstants.MessageBytes;
 
                 using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
-                    encryptionStream.Write(plainText);
+                    encryptionStream.Write(plaintext);
                 }
 
                 cipherTextStream.Position = 0;
 
                 using (var decryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Decrypt))
                 {
-                    var decryptedPlainText = new byte[plainText.Length * 2];
+                    var decryptedPlainText = new byte[plaintext.Length * 2];
                     var numberOfBytesOutput = decryptionStream.Read(decryptedPlainText);
 
-                    Assert.Equal(plainText.Length, numberOfBytesOutput);
-                    Assert.Equal(plainText, decryptedPlainText.Take(plainText.Length));
+                    Assert.Equal(plaintext.Length, numberOfBytesOutput);
+                    Assert.Equal(plaintext, decryptedPlainText.Take(plaintext.Length));
                 }
             }
         }
@@ -236,22 +236,22 @@ namespace XChaChaDotNet.UnitTests
             using (var cipherTextStream = new MemoryStream())
             using (var key = XChaChaKey.Generate())
             {
-                var plainText = RandomBytesGenerator.NextBytes(1024 * 1024);
+                var plaintext = RandomBytesGenerator.NextBytes(1024 * 1024);
 
                 using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt, bufferLength, leaveOpen: true))
                 {
-                    encryptionStream.Write(plainText);
+                    encryptionStream.Write(plaintext);
                 }
 
                 cipherTextStream.Position = 0;
 
                 using (var decryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Decrypt, bufferLength))
                 {
-                    var decryptedPlainText = new byte[plainText.Length];
+                    var decryptedPlainText = new byte[plaintext.Length];
                     var numberOfBytesOutput = decryptionStream.Read(decryptedPlainText);
 
-                    Assert.Equal(plainText.Length, numberOfBytesOutput);
-                    Assert.Equal(plainText.ToArray(), decryptedPlainText);
+                    Assert.Equal(plaintext.Length, numberOfBytesOutput);
+                    Assert.Equal(plaintext.ToArray(), decryptedPlainText);
                 }
             }
         }
@@ -262,13 +262,13 @@ namespace XChaChaDotNet.UnitTests
             using (var cipherTextStream = new MemoryStream())
             using (var key = XChaChaKey.Generate())
             {
-                var plainText = TestConstants.MessageBytes;
+                var plaintext = TestConstants.MessageBytes;
 
                 using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
                 {
                     using (var compressionStream = new BrotliStream(encryptionStream, CompressionMode.Compress))
                     {
-                        compressionStream.Write(plainText);
+                        compressionStream.Write(plaintext);
                     }
                 }
 
@@ -278,11 +278,11 @@ namespace XChaChaDotNet.UnitTests
                 {
                     using (var decompressionStream = new BrotliStream(decryptionStream, CompressionMode.Decompress))
                     {
-                        var decryptedPlainText = new byte[plainText.Length];
+                        var decryptedPlainText = new byte[plaintext.Length];
                         var numberOfBytesOutput = decompressionStream.Read(decryptedPlainText);
 
-                        Assert.Equal(plainText.Length, numberOfBytesOutput);
-                        Assert.Equal(plainText, decryptedPlainText);
+                        Assert.Equal(plaintext.Length, numberOfBytesOutput);
+                        Assert.Equal(plaintext, decryptedPlainText);
                     }
                 }
             }
