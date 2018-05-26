@@ -22,7 +22,7 @@ namespace XChaChaDotNet.Benchmarks
             this.data = new byte[this.DataLengthKb * 1024];
             new Random(31).NextBytes(data);
             this.key = XChaChaKey.Generate();
-            var nonce = XChaChaNonce.Generate();
+            this.nonce = XChaChaNonce.Generate();
             var secretBoxCipher = new XChaChaSecretBoxCipher();
 
             this.encryptedData = new byte[secretBoxCipher.GetCipherTextLength(this.data.Length)];
