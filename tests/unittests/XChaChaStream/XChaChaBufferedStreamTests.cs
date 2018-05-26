@@ -3,6 +3,7 @@ namespace XChaChaDotNet.UnitTests
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.IO.Compression;
     using System.Linq;
     using Xunit;
     using static TestConstants;
@@ -251,6 +252,38 @@ namespace XChaChaDotNet.UnitTests
 
                     Assert.Equal(plainText.Length, numberOfBytesOutput);
                     Assert.Equal(plainText.ToArray(), decryptedPlainText);
+                }
+            }
+        }
+
+        [Fact]
+        public void Test_Decrypt_UsingCompressionStream_DecryptsSmallBlock()
+        {
+            using (var cipherTextStream = new MemoryStream())
+            using (var key = XChaChaKey.Generate())
+            {
+                var plainText = TestConstants.MessageBytes;
+
+                using (var encryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
+                {
+                    using (var compressionStream = new BrotliStream(encryptionStream, CompressionMode.Compress))
+                    {
+                        compressionStream.Write(plainText);
+                    }
+                }
+
+                cipherTextStream.Position = 0;
+
+                using (var decryptionStream = new XChaChaBufferedStream(cipherTextStream, key, EncryptionMode.Decrypt))
+                {
+                    using (var decompressionStream = new BrotliStream(decryptionStream, CompressionMode.Decompress))
+                    {
+                        var decryptedPlainText = new byte[plainText.Length];
+                        var numberOfBytesOutput = decompressionStream.Read(decryptedPlainText);
+
+                        Assert.Equal(plainText.Length, numberOfBytesOutput);
+                        Assert.Equal(plainText, decryptedPlainText);
+                    }
                 }
             }
         }
