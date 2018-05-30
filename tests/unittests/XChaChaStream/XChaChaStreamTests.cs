@@ -93,6 +93,31 @@ namespace XChaChaDotNet.UnitTests
         }
 
         [Fact]
+        public void Test_Encrypt_EncryptsTwoBlocks()
+        {
+            using (var ciphertextStream = new MemoryStream())
+            using (var key = XChaChaKey.Generate())
+            {
+                const int blockLength = 128 * 1024;
+                var block1 = RandomBytesGenerator.NextBytes(blockLength);
+                var block2 = RandomBytesGenerator.NextBytes(blockLength);
+
+                using (var encryptionStream = new XChaChaStream(ciphertextStream, key, EncryptionMode.Encrypt))
+                {
+                    encryptionStream.Write(block1);
+                    encryptionStream.WriteFinal(block2);
+                }
+
+                var ciphertext = ciphertextStream.ToArray();
+
+                const int numberOfWrites = 2;
+                const int expectedCiphertextLength = StreamHeaderLength + 2 * blockLength + (numberOfWrites * StreamABytes);
+
+                Assert.Equal(expectedCiphertextLength, ciphertext.Length);
+            }
+        }
+
+        [Fact]
         public void Test_Encrypt_WithAdditionalData()
         {
             var plaintext = TestConstants.MessageBytes;
@@ -172,6 +197,39 @@ namespace XChaChaDotNet.UnitTests
         }
 
         [Fact]
+        public void Test_Decrypt_DecryptsTwoBlocks()
+        {
+            using (var ciphertextStream = new MemoryStream())
+            using (var key = XChaChaKey.Generate())
+            {
+                const int blockLength = 128 * 1024;
+                var block1 = RandomBytesGenerator.NextBytes(blockLength);
+                var block2 = RandomBytesGenerator.NextBytes(blockLength);
+
+                using (var encryptionStream = new XChaChaStream(ciphertextStream, key, EncryptionMode.Encrypt, leaveOpen: true))
+                {
+                    encryptionStream.Write(block1);
+                    encryptionStream.WriteFinal(block2);
+                }
+
+                ciphertextStream.Position = 0;
+
+                using (var decryptionStream = new XChaChaStream(ciphertextStream, key, EncryptionMode.Decrypt))
+                {
+                    var decryptedBlock1 = new byte[blockLength];
+                    var decryptedBlock2 = new byte[blockLength];
+                    var numberOfBytesOutput1 = decryptionStream.Read(decryptedBlock1);
+                    var numberOfBytesOutput2 = decryptionStream.Read(decryptedBlock2);
+
+                    Assert.Equal(blockLength, numberOfBytesOutput1);
+                    Assert.Equal(block1, decryptedBlock1);
+                    Assert.Equal(blockLength, numberOfBytesOutput2);
+                    Assert.Equal(block2, decryptedBlock2);
+                }
+            }
+        }
+
+        [Fact]
         public void Test_Decrypt_DecryptsBlock_WithAdditionalData()
         {
             using (var ciphertextStream = new MemoryStream())
@@ -197,7 +255,6 @@ namespace XChaChaDotNet.UnitTests
                 }
             }
         }
-
 
         [Fact]
         public void Test_Decrypt_WithInvalidAdditionalData_Fails()
