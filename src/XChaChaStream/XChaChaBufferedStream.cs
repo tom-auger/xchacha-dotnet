@@ -181,7 +181,8 @@ namespace XChaChaDotNet
                 {
                     // Attempt to fill the buffer first before processing
                     var bytesToStore = Math.Min(source.Length, remainingPlaintextBufferCapacity);
-                    source.Slice(0, bytesToStore).CopyTo(this.plaintextBuffer.AsSpan());
+                    var bufferSpan = this.plaintextBuffer.AsSpan(this.plaintextBufferPosition, remainingPlaintextBufferCapacity);
+                    source.Slice(0, bytesToStore).CopyTo(bufferSpan);
 
                     this.plaintextBufferPosition += bytesToStore;
                     source = source.Slice(bytesToStore);
