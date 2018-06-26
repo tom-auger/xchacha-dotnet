@@ -17,6 +17,7 @@
     <MinClientVersion>4.0</MinClientVersion>
     <PackageVersion>1.0.0</PackageVersion>
     <Description>A .NET wrapper for the XChaCha constructions and APIs provided by the libsodium crypto library.</Description>
+    <PackageTags>cryptography;libsodium;xchacha</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
