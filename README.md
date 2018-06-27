@@ -1,4 +1,6 @@
-# XChaCha-DotNet
+# XChaCha-DotNet 
+
+[![Build status](https://ci.appveyor.com/api/projects/status/9ic3sjgi31be1x55?svg=true)](https://ci.appveyor.com/project/tom-auger/xchacha-dotnet)
 
 A .NET wrapper for the XChaCha constructions and APIs provided by [libsodium](https://libsodium.org/) crypto library.
 
